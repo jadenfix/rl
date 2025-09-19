@@ -20,10 +20,19 @@ Progress log — RLaaS implementation
 - 2025-09-19 12:18 PDT — User confirmed local `/healthz` checks across gateway, reward, trainer, and collector services (Phase 0 gate closed).
 - 2025-09-19 12:28 PDT — Wired collector persistence through connection-pooled Postgres writes with optional MinIO staging hooks (`apps/collector/app/main.py`, `apps/collector/app/storage.py`, `apps/collector/requirements.txt`).
 - 2025-09-19 12:35 PDT — Updated docs and configuration to reflect remote Postgres workflow and ingestion smoke tests (`README.md`, `docs/SMOKE_TEST.md`, `.env`).
+- 2025-09-19 12:45 PDT — Initialized git repo, captured initial commit, and pushed history to `origin/main` for GitHub sharing (`git init`, `git push -u origin main`).
+- 2025-09-19 12:52 PDT — Expanded `roadmap.md` Phase 1 section with sprint focus checklist covering MinIO staging, OpenAPI artifacts, SDK transport, and PII scrub tasks (`roadmap.md:35`).
+- 2025-09-19 12:55 PDT — Documented Phase 2 dependency notes in `roadmap.md`, clarifying readiness of the gateway skeleton and sequencing behind telemetry stability (`roadmap.md:57`).
+- 2025-09-19 13:08 PDT — Implemented MinIO staging pipeline with bucket bootstrap, JSONL uploads, and secure configuration toggles (`apps/collector/app/storage.py`, `docker-compose.yml`, `config/.env.example`).
+- 2025-09-19 13:14 PDT — Added Parquet compaction CLI, Makefile target, and smoke-test instructions for daily cold storage promotion (`apps/collector/app/compaction.py`, `Makefile`, `docs/SMOKE_TEST.md`).
+- 2025-09-19 13:18 PDT — Delivered regex-driven PII scrubbing with tenant allow-list overrides and unit coverage (`apps/collector/app/pii.py`, `apps/collector/tests/test_pii.py`).
+- 2025-09-19 13:24 PDT — Generated OpenAPI artifacts directly from shared JSON schemas via `scripts/generate_openapi.py` (`docs/openapi/collector.json`).
+- 2025-09-19 13:34 PDT — Shipped Python SDK client with retry/backoff, file-backed offline buffer, and pytest suite (`apps/sdk-python/src/rl_sdk`, `apps/sdk-python/tests/test_client.py`, `apps/sdk-python/pyproject.toml`).
+- 2025-09-19 13:42 PDT — Updated top-level documentation and plan to capture Phase 1 readiness, telemetry tooling, and SDK deliverables (`README.md`, `plan.md`, `roadmap.md`, `docs/SDK_TASKS.md`).
 
 Current focus
-- Implement collector cold-storage (MinIO) staging, expose OpenAPI artifacts, and start Python SDK transport based on shared schemas.
+- Ship TypeScript SDK parity (transport + offline buffer) and define collector idempotency strategy shared across clients.
 
 Next checkpoints
-- Enable MinIO-backed batch staging and document retention workflow.
-- Scaffold Python SDK core client (httpx transport + retries) and associated tests.
+- Deliver TypeScript SDK transport/offline buffer with tests.
+- Document idempotency headers + hashing strategy across SDKs and collector.

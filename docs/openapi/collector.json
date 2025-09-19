@@ -1,0 +1,741 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "RLaaS Telemetry Collector",
+    "version": "1.0.0",
+    "description": "Event ingestion API for RLaaS telemetry."
+  },
+  "servers": [
+    {
+      "url": "https://collector.example.com"
+    },
+    {
+      "url": "http://localhost:8100"
+    }
+  ],
+  "paths": {
+    "/healthz": {
+      "get": {
+        "summary": "Health check",
+        "responses": {
+          "200": {
+            "description": "Service healthy",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "ok"
+                    },
+                    "service": {
+                      "type": "string",
+                      "example": "collector"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/interaction.create": {
+      "post": {
+        "summary": "Ingest interaction request event",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InteractionCreateEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for persistence",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "accepted"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/interaction.output": {
+      "post": {
+        "summary": "Ingest model output event",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InteractionOutputEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for persistence",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "accepted"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/feedback.submit": {
+      "post": {
+        "summary": "Ingest user feedback",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackSubmitEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for persistence",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "accepted"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/task_result": {
+      "post": {
+        "summary": "Ingest downstream task result",
+        "security": [
+          {
+            "ApiKeyAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TaskResultEvent"
+              }
+            }
+          }
+        },
+        "responses": {
+          "202": {
+            "description": "Event accepted for persistence",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "status": {
+                      "type": "string",
+                      "example": "accepted"
+                    }
+                  },
+                  "required": [
+                    "status"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/v1/validate": {
+      "post": {
+        "summary": "Validate payload against supported schemas",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "oneOf": [
+                  {
+                    "$ref": "#/components/schemas/InteractionCreateEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/InteractionOutputEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/FeedbackSubmitEvent"
+                  },
+                  {
+                    "$ref": "#/components/schemas/TaskResultEvent"
+                  }
+                ],
+                "description": "Payload to validate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payload valid",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "event_type": {
+                      "type": "string"
+                    },
+                    "valid": {
+                      "type": "boolean"
+                    }
+                  },
+                  "required": [
+                    "event_type",
+                    "valid"
+                  ]
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Payload failed validation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "detail": {
+                      "type": "string",
+                      "example": "Payload does not match any collector schema"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "InteractionCreateEvent": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "https://rlaas.dev/schemas/interaction_create.json",
+        "title": "InteractionCreateEvent",
+        "type": "object",
+        "required": [
+          "tenant_id",
+          "user_id",
+          "skill",
+          "input",
+          "context",
+          "version",
+          "timings",
+          "costs"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "user_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "skill": {
+            "type": "string",
+            "minLength": 1
+          },
+          "input": {
+            "type": "object",
+            "required": [
+              "text"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "attachments": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "format": "uri"
+                }
+              },
+              "metadata": {
+                "type": "object",
+                "additionalProperties": true
+              }
+            }
+          },
+          "context": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "retrieval_chunks": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "id",
+                    "text"
+                  ],
+                  "additionalProperties": true,
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "text": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "score": {
+                      "type": "number"
+                    },
+                    "source": {
+                      "type": "string"
+                    }
+                  }
+                }
+              },
+              "customer_tier": {
+                "type": "string"
+              },
+              "sla_mins": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "version": {
+            "type": "object",
+            "required": [
+              "policy_id",
+              "base_model"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "policy_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "base_model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "adapter": {
+                "type": "string"
+              }
+            }
+          },
+          "timings": {
+            "type": "object",
+            "required": [
+              "ms_total"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "ms_total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "ms_decode": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "costs": {
+            "type": "object",
+            "required": [
+              "tokens_in",
+              "tokens_out"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "tokens_in": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "tokens_out": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "InteractionOutputEvent": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "https://rlaas.dev/schemas/interaction_output.json",
+        "title": "InteractionOutputEvent",
+        "type": "object",
+        "required": [
+          "tenant_id",
+          "interaction_id",
+          "output",
+          "timings",
+          "costs",
+          "version"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "interaction_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "output": {
+            "type": "object",
+            "required": [
+              "text"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "tool_calls": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "tool_name",
+                    "arguments"
+                  ],
+                  "properties": {
+                    "tool_name": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "arguments": {
+                      "type": "object",
+                      "additionalProperties": true
+                    },
+                    "status": {
+                      "type": "string"
+                    },
+                    "latency_ms": {
+                      "type": "integer",
+                      "minimum": 0
+                    }
+                  },
+                  "additionalProperties": false
+                }
+              },
+              "citations": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": [
+                    "chunk_id"
+                  ],
+                  "additionalProperties": true,
+                  "properties": {
+                    "chunk_id": {
+                      "type": "string",
+                      "minLength": 1
+                    },
+                    "confidence": {
+                      "type": "number",
+                      "minimum": 0,
+                      "maximum": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "timings": {
+            "type": "object",
+            "required": [
+              "ms_total"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "ms_total": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "ms_decode": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "costs": {
+            "type": "object",
+            "required": [
+              "tokens_in",
+              "tokens_out"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "tokens_in": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "tokens_out": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "dollars": {
+                "type": "number",
+                "minimum": 0
+              }
+            }
+          },
+          "version": {
+            "type": "object",
+            "required": [
+              "policy_id",
+              "base_model"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "policy_id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "base_model": {
+                "type": "string",
+                "minLength": 1
+              },
+              "adapter": {
+                "type": "string"
+              }
+            }
+          },
+          "trace_id": {
+            "type": "string"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FeedbackSubmitEvent": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "https://rlaas.dev/schemas/feedback_submit.json",
+        "title": "FeedbackSubmitEvent",
+        "type": "object",
+        "required": [
+          "tenant_id",
+          "interaction_id"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "interaction_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "explicit": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "thumb": {
+                "type": "integer",
+                "enum": [
+                  -1,
+                  1
+                ]
+              },
+              "rating": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 5
+              },
+              "comment": {
+                "type": "string"
+              }
+            }
+          },
+          "implicit": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "edited_text": {
+                "type": "string"
+              },
+              "sent": {
+                "type": "boolean"
+              },
+              "time_to_send_ms": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "escalated": {
+                "type": "boolean"
+              },
+              "follow_up_count": {
+                "type": "integer",
+                "minimum": 0
+              }
+            }
+          },
+          "labels": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TaskResultEvent": {
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "$id": "https://rlaas.dev/schemas/task_result.json",
+        "title": "TaskResultEvent",
+        "type": "object",
+        "required": [
+          "tenant_id",
+          "interaction_id",
+          "label"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "tenant_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "interaction_id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "label": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "correct": {
+                "type": "boolean"
+              },
+              "f1": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "resolved": {
+                "type": "boolean"
+              },
+              "kpi_delta": {
+                "type": "number"
+              }
+            }
+          },
+          "observed_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "note": {
+            "type": "string"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      }
+    },
+    "securitySchemes": {
+      "ApiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Use bearer API key: `Authorization: Bearer <token>`"
+      }
+    }
+  }
+}

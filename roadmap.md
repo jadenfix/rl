@@ -32,14 +32,22 @@ Phase 1 — Telemetry & Feedback SDK
 
 Goal: capture everything needed to learn from usage.
 
-Status: In progress — executing Plan P0 Step 2 now that the stack is live.
+Status: In progress — ingestion + Python SDK shipped; wrapping TypeScript parity and idempotency helpers.
 
 Progress: JSON schemas landed; FastAPI collector writes validated events into Postgres with connection pooling; placeholder gateway/reward/trainer services keep `/healthz` and `/metrics` coverage for end-to-end smoke tests (`config/schemas/events`, `apps/collector`, `apps/gateway/app/main.py`, `apps/reward/app/main.py`, `apps/trainer/app/main.py`).
 Latest:
 - Event JSON Schemas committed for interaction, output, feedback, and task result payloads (`config/schemas/events`).
 - Telemetry collector FastAPI service added with validation endpoints and Prometheus scrape target (`apps/collector`, `docker-compose.yml:4`).
-- Collector now persists events to Postgres via connection pooling, with MinIO staging hook stubbed and smoke-test docs refreshed (`apps/collector/app/main.py`, `apps/collector/app/storage.py`, `docs/SMOKE_TEST.md`).
-- Next: wire up MinIO cold-storage flow, publish OpenAPI artifacts for the collector, and ship the Python SDK transport/retry layer (`progress.md`, Current focus).
+- Collector now persists events to Postgres via connection pooling, stages JSONL payloads in MinIO, and ships a compaction CLI that writes Parquet batches (`apps/collector/app/storage.py`, `apps/collector/app/compaction.py`).
+- OpenAPI artifacts are generated from shared JSON Schemas via `scripts/generate_openapi.py`, producing `docs/openapi/collector.json` for SDK consumers.
+- Python SDK client delivers retries, offline buffering, and pytest coverage; TypeScript SDK remains the next parity milestone (`apps/sdk-python/src/rl_sdk`, `apps/sdk-python/tests`).
+- Focus (Sprint 09-19):
+  - [x] Enable MinIO staging path + daily compaction (blocks Parquet exports for Roadmap Phase 1 gate).
+  - [x] Generate OpenAPI schema + docs bundle for SDK authors.
+  - [x] Implement Python SDK core client (httpx transport, retries, offline buffer) with contract tests.
+  - [x] Extend PII scrub hooks prior to storage and document toggles per tenant.
+  - [ ] Deliver TypeScript SDK transport/offline buffer.
+  - [ ] Define collector idempotency helpers + default headers across SDKs.
 
 Checklist
 	•	Event API (/v1/interaction.create, /v1/interaction.output, /v1/feedback.submit, /v1/task_result)
@@ -58,7 +66,13 @@ Phase 2 — Serving gateway & policy router
 
 Goal: vendor-agnostic inference with shadow/A-B gates.
 
-Status: Pending — slated immediately after SDK instrumentation (Plan P0 Step 3).
+Status: Pending — prep work tracking Plan P0 Step 3; blocked on Phase 1 telemetry stability and SDK availability.
+
+Progress: Gateway skeleton online with `/healthz` + `/metrics`; policy registry schema outlined alongside collector schemas, ready for integration once event ingestion is stable (`apps/gateway/app/main.py`, `config/db/init.sql`).
+
+Latest planning notes:
+- Router/bandit implementation queued immediately after telemetry cold-storage + SDK transport ship (see `plan.md`, Immediate next actions #3).
+- Drafted bandit helper pseudocode in `plan.md` (Section 5) to guide Thompson Sampling implementation.
 
 Checklist
 	•	Inference API (/v1/infer) with request tracing (OpenTelemetry)

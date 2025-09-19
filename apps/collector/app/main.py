@@ -8,6 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 
 from . import schemas
+from .pii import build_scrubber
 from .storage import PersistenceLayer, PersistenceSettings
 
 logger = logging.getLogger("collector")
@@ -15,6 +16,11 @@ logging.basicConfig(level=logging.INFO)
 
 settings = PersistenceSettings.from_env()
 storage = PersistenceLayer(settings=settings)
+scrubber = build_scrubber(
+    enabled=settings.pii_scrub_enabled,
+    allowlist=settings.pii_tenant_allowlist,
+    redaction_token=settings.pii_redaction_token,
+)
 
 app = FastAPI(title="RLaaS Telemetry Collector", version="0.1.0")
 
@@ -28,9 +34,8 @@ app.add_middleware(
 
 
 def _scrub_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
-    """Placeholder for future PII scrubbing hooks."""
-    # TODO: integrate regex/classifier based scrubbing per roadmap Phase 1.
-    return payload
+    tenant_id = payload.get("tenant_id") if isinstance(payload, dict) else None
+    return scrubber.scrub(payload, tenant_id=tenant_id)
 
 
 @app.get("/healthz")

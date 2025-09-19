@@ -14,14 +14,14 @@ Implementation alignment (roadmap crosswalk)
 
 Status sync (2025-09-19, see `progress.md`):
 - Phase 0 gate closed: docker-compose stack stood up locally, tenant seed verified against Neon Postgres, and `/healthz` checks confirmed.
-- Phase 1 execution live: FastAPI collector is persisting events to Postgres; next up is MinIO cold-storage staging plus OpenAPI artifact publishing.
+- Phase 1 execution live: FastAPI collector persists to Postgres and stages MinIO JSONL; OpenAPI artifacts + Python SDK shipped, TypeScript parity slated next.
 - Phase 2 staging: inference gateway skeleton exists; router/bandit wiring will follow once telemetry ingestion and SDK transport are stable.
 
 Immediate next actions (P0 focus)
 
 1. (DONE) Stand up the monorepo + docker-compose stack (gateway, trainer, reward, dashboard, SDKs) with pre-commit hooks and seeded tenant/policy tables.
-2. (IN FLIGHT) Expand the telemetry API + SDK foundations: add MinIO staging for cold storage, publish OpenAPI schemas, tighten PII scrub hooks, and kick off the Python SDK transport/backoff layer.
-3. (NEXT) Implement inference gateway + policy router with bandit scaffolding and shadow logging once telemetry ingestion and SDK instrumentation prove stable.
+2. (READY FOR DEV QA) Telemetry API + Python SDK now include MinIO staging, Parquet compaction tooling, OpenAPI export, and PII scrubbing hooks; remaining work focuses on TypeScript parity and idempotency helpers.
+3. (NEXT) Implement inference gateway + policy router with bandit scaffolding and shadow logging once telemetry ingestion (incl. SDK parity) proves stable.
 
 ⸻
 

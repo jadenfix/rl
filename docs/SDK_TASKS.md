@@ -1,12 +1,12 @@
 # SDK Workplan (Phase 1)
 
 ## Python SDK
-1. Implement async HTTP client with retry/backoff using `httpx`.
-2. Provide sync convenience wrappers that delegate to async core via `anyio`.
-3. Add local queue (SQLite or file-based) for offline buffering with background flush.
-4. Bundle middleware helpers (FastAPI/Starlette) to record inbound/outbound payloads automatically.
-5. Expose CLI commands for validating payloads (`validate`, `drain-queue`).
-6. Ship unit tests covering retry logic, offline queue replay, and schema conformance (using `config/schemas/events`).
+- [x] Implement sync HTTP client with retry/backoff using `httpx` (`apps/sdk-python/src/rl_sdk/client.py`).
+- [x] Provide file-backed offline buffer with manual flush and tests (`apps/sdk-python/src/rl_sdk/buffer.py`).
+- [x] Ship unit tests covering retry logic, offline queue replay, and schema validation entry points (`apps/sdk-python/tests/test_client.py`).
+- [ ] Promote async helpers via `httpx.AsyncClient` and `anyio` wrappers.
+- [ ] Bundle middleware helpers (FastAPI/Starlette) to record inbound/outbound payloads automatically.
+- [ ] Expose CLI commands for payload validation (`validate`, `drain-queue`).
 
 ## TypeScript SDK
 1. Build core client with fetch + AbortController, including retry policies and exponential backoff.
@@ -17,6 +17,6 @@
 6. Add Jest/Vitest coverage for transport, queuing, and schema validation.
 
 ## Shared tasks
-- Establish OpenAPI spec export from collector to distribute typed clients.
-- Define idempotency strategy (header + payload hash) and integrate with SDK defaults.
-- Document integration examples (support draft app) referencing smoke-test checklist.
+- [x] Establish OpenAPI spec export from collector to distribute typed clients (`scripts/generate_openapi.py`, `docs/openapi/collector.json`).
+- [ ] Define idempotency strategy (header + payload hash) and integrate with SDK defaults.
+- [ ] Document integration examples (support draft app) referencing smoke-test checklist.
