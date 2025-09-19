@@ -1,0 +1,146 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://rlaas.dev/schemas/interaction_create.json",
+  "title": "InteractionCreateEvent",
+  "type": "object",
+  "required": [
+    "tenant_id",
+    "user_id",
+    "skill",
+    "input",
+    "context",
+    "version",
+    "timings",
+    "costs"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "user_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "skill": {
+      "type": "string",
+      "minLength": 1
+    },
+    "input": {
+      "type": "object",
+      "required": ["text"],
+      "additionalProperties": true,
+      "properties": {
+        "text": {
+          "type": "string",
+          "minLength": 1
+        },
+        "attachments": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uri"
+          }
+        },
+        "metadata": {
+          "type": "object",
+          "additionalProperties": true
+        }
+      }
+    },
+    "context": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "retrieval_chunks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "text"],
+            "additionalProperties": true,
+            "properties": {
+              "id": {
+                "type": "string",
+                "minLength": 1
+              },
+              "text": {
+                "type": "string",
+                "minLength": 1
+              },
+              "score": {
+                "type": "number"
+              },
+              "source": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "customer_tier": {
+          "type": "string"
+        },
+        "sla_mins": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "version": {
+      "type": "object",
+      "required": ["policy_id", "base_model"],
+      "additionalProperties": true,
+      "properties": {
+        "policy_id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "base_model": {
+          "type": "string",
+          "minLength": 1
+        },
+        "adapter": {
+          "type": "string"
+        }
+      }
+    },
+    "timings": {
+      "type": "object",
+      "required": ["ms_total"],
+      "additionalProperties": true,
+      "properties": {
+        "ms_total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "ms_decode": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "costs": {
+      "type": "object",
+      "required": ["tokens_in", "tokens_out"],
+      "additionalProperties": true,
+      "properties": {
+        "tokens_in": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "tokens_out": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

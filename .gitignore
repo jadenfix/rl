@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.env
+.venv/
+venv/
+.env.local
+
+# Node/TypeScript
+node_modules/
+.npm-cache
+pnpm-lock.yaml
+
+# Mac / Editor
+.DS_Store
+.idea/
+.vscode/
+
+# Docker artifacts
+*.log
+volumes/
+.tmp/
+
+# ML artifacts
+mlruns/
+checkpoints/

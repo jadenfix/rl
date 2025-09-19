@@ -1,0 +1,133 @@
+version: "3.9"
+
+services:
+  collector:
+    build:
+      context: ./apps/collector
+      dockerfile: Dockerfile
+    container_name: rlaas-collector
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_SSLMODE: ${POSTGRES_SSLMODE:-}
+      DATABASE_URL: ${DATABASE_URL}
+      MINIO_ENABLED: ${MINIO_ENABLED:-false}
+    ports:
+      - "8100:8100"
+    depends_on:
+      - postgres
+
+  gateway:
+    build:
+      context: ./apps/gateway
+      dockerfile: Dockerfile
+    container_name: rlaas-gateway
+    restart: unless-stopped
+    environment:
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: ${POSTGRES_PORT}
+    ports:
+      - "8000:8000"
+    depends_on:
+      - postgres
+
+  reward:
+    build:
+      context: ./apps/reward
+      dockerfile: Dockerfile
+    container_name: rlaas-reward
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+      - minio
+
+  trainer:
+    build:
+      context: ./apps/trainer
+      dockerfile: Dockerfile
+    container_name: rlaas-trainer
+    restart: unless-stopped
+    ports:
+      - "8090:8090"
+    depends_on:
+      - postgres
+      - minio
+
+  postgres:
+    image: postgres:16-alpine
+    container_name: rlaas-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "${POSTGRES_PORT}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./config/db/init.sql:/docker-entrypoint-initdb.d/00-init.sql:ro
+      - ./config/db/seed.sql:/docker-entrypoint-initdb.d/10-seed.sql:ro
+
+  minio:
+    image: minio/minio:RELEASE.2024-08-17T01-24-54Z
+    container_name: rlaas-minio
+    restart: unless-stopped
+    command: server /data --console-address ":${MINIO_CONSOLE_PORT}"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "${MINIO_PORT}:9000"
+      - "${MINIO_CONSOLE_PORT}:9090"
+    volumes:
+      - minio-data:/data
+
+  qdrant:
+    image: qdrant/qdrant:v1.11.0
+    container_name: rlaas-qdrant
+    restart: unless-stopped
+    ports:
+      - "${QDRANT_PORT}:6333"
+    volumes:
+      - qdrant-data:/qdrant/storage
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    container_name: rlaas-prometheus
+    restart: unless-stopped
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.retention.time=7d
+    volumes:
+      - ./config/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    ports:
+      - "${PROMETHEUS_PORT}:9090"
+
+  grafana:
+    image: grafana/grafana:10.4.5
+    container_name: rlaas-grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./config/grafana/provisioning:/etc/grafana/provisioning:ro
+    ports:
+      - "${GRAFANA_PORT}:3000"
+    depends_on:
+      - prometheus
+
+volumes:
+  postgres-data:
+  minio-data:
+  qdrant-data:
+  prometheus-data:
+  grafana-data:

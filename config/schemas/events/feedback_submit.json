@@ -1,0 +1,74 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://rlaas.dev/schemas/feedback_submit.json",
+  "title": "FeedbackSubmitEvent",
+  "type": "object",
+  "required": [
+    "tenant_id",
+    "interaction_id"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "tenant_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "interaction_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "explicit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "thumb": {
+          "type": "integer",
+          "enum": [-1, 1]
+        },
+        "rating": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "comment": {
+          "type": "string"
+        }
+      }
+    },
+    "implicit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "edited_text": {
+          "type": "string"
+        },
+        "sent": {
+          "type": "boolean"
+        },
+        "time_to_send_ms": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "escalated": {
+          "type": "boolean"
+        },
+        "follow_up_count": {
+          "type": "integer",
+          "minimum": 0
+        }
+      }
+    },
+    "labels": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "idempotency_key": {
+      "type": "string",
+      "minLength": 1
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}
