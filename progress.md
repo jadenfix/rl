@@ -29,10 +29,13 @@ Progress log — RLaaS implementation
 - 2025-09-19 13:24 PDT — Generated OpenAPI artifacts directly from shared JSON schemas via `scripts/generate_openapi.py` (`docs/openapi/collector.json`).
 - 2025-09-19 13:34 PDT — Shipped Python SDK client with retry/backoff, file-backed offline buffer, and pytest suite (`apps/sdk-python/src/rl_sdk`, `apps/sdk-python/tests/test_client.py`, `apps/sdk-python/pyproject.toml`).
 - 2025-09-19 13:42 PDT — Updated top-level documentation and plan to capture Phase 1 readiness, telemetry tooling, and SDK deliverables (`README.md`, `plan.md`, `roadmap.md`, `docs/SDK_TASKS.md`).
+- 2025-09-19 13:58 PDT — Scaffolded TypeScript SDK package with build/test tooling (tsconfig, vitest config, package manifest) and shared storage adapters (`apps/sdk-js/package.json`, `apps/sdk-js/src/storage.ts`).
+- 2025-09-19 14:05 PDT — Implemented fetch-based telemetry client with retries, timeouts, and offline flush plus Vitest coverage for success, retry, buffering, and validate flows (`apps/sdk-js/src/client.ts`, `apps/sdk-js/test/client.test.ts`).
+- 2025-09-19 14:12 PDT — Updated SDK roadmap and README docs to reflect TypeScript parity and remaining front-end tasks (`docs/SDK_TASKS.md`, `apps/sdk-js/README.md`, `README.md`, `plan.md`, `roadmap.md`).
 
 Current focus
-- Ship TypeScript SDK parity (transport + offline buffer) and define collector idempotency strategy shared across clients.
+- Define collector idempotency strategy shared across clients.
 
 Next checkpoints
-- Deliver TypeScript SDK transport/offline buffer with tests.
 - Document idempotency headers + hashing strategy across SDKs and collector.
+- Prototype React/extension helpers once idempotency is settled.

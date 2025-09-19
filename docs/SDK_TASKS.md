@@ -9,12 +9,12 @@
 - [ ] Expose CLI commands for payload validation (`validate`, `drain-queue`).
 
 ## TypeScript SDK
-1. Build core client with fetch + AbortController, including retry policies and exponential backoff.
-2. Implement pluggable storage adapters (in-memory, IndexedDB) for offline buffering.
-3. Deliver React hooks (`useTelemetry`, `useFeedback`) and vanilla helpers for browser extensions.
-4. Include Node.js adapter with keep-alive agent and optional proxy configuration.
-5. Generate TypeScript types from shared JSON Schemas (via `typescript-json-schema`).
-6. Add Jest/Vitest coverage for transport, queuing, and schema validation.
+- [x] Build core client with fetch + AbortController, including retry policies and exponential backoff (`apps/sdk-js/src/client.ts`).
+- [x] Implement pluggable storage adapters (in-memory + localStorage) for offline buffering (`apps/sdk-js/src/storage.ts`).
+- [x] Add Vitest coverage for transport retries, buffering, and validation responses (`apps/sdk-js/test/client.test.ts`).
+- [ ] Deliver React hooks (`useTelemetry`, `useFeedback`) and vanilla helpers for browser extensions.
+- [ ] Include Node.js adapter with keep-alive agent and optional proxy configuration.
+- [ ] Generate TypeScript types from shared JSON Schemas (via `typescript-json-schema`).
 
 ## Shared tasks
 - [x] Establish OpenAPI spec export from collector to distribute typed clients (`scripts/generate_openapi.py`, `docs/openapi/collector.json`).

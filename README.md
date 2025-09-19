@@ -30,4 +30,5 @@ Refer to `progress.md` for the latest implementation status and upcoming checkpo
 - Daily compaction to Parquet is handled by `apps/collector/app/compaction.py`; invoke via `make compact` or `python3 -m apps.collector.app.compaction --date YYYY-MM-DD`.
 - OpenAPI schema generation pulls from the shared JSON Schemas via `scripts/generate_openapi.py` (also available through `make openapi`).
 - Python SDK (`apps/sdk-python`) ships a retrying telemetry client with file-backed offline buffering and pytest coverage for failure modes.
+- TypeScript SDK (`apps/sdk-js`) mirrors the telemetry client with fetch-based retries, storage adapters, and Vitest tests.
 - PII scrubbing hooks redact common patterns (email, phone, payment, SSN) with tenant allow-list overrides (`apps/collector/app/pii.py`).

@@ -1,9 +1,14 @@
 # TypeScript SDK
 
-Browser and Node-friendly client for emitting telemetry and invoking inference within enterprise applications.
+Browser and Node-friendly client for emitting telemetry into the RLaaS collector.
 
-## Planned components
-- Lightweight core with fetch-based transport and offline buffering
-- React hooks + middleware for webapps and extensions
-- Type-safe schema bindings generated from shared definitions
-- Instrumentation examples for Gmail, Zendesk, and Salesforce integrations
+## What works today
+- Fetch-based `TelemetryClient` with retries, exponential backoff, and request timeouts (`src/client.ts`).
+- Offline buffering via pluggable storage adapters (`MemoryStorageAdapter`, `LocalStorageAdapter`) so events survive transient outages (`src/storage.ts`).
+- Vitest coverage for retry logic, buffering, and `/v1/validate` responses (`test/client.test.ts`).
+
+## Roadmap
+- React hooks + middleware helpers for browser extensions and shared UI components.
+- Node-specific adapter with keep-alive agent, proxy controls, and streaming support.
+- Generated TypeScript types from shared JSON Schemas.
+- End-to-end examples (Gmail, Zendesk, Salesforce) mirroring the integration playbook in `docs/`.

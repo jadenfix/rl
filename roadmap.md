@@ -46,7 +46,7 @@ Latest:
   - [x] Generate OpenAPI schema + docs bundle for SDK authors.
   - [x] Implement Python SDK core client (httpx transport, retries, offline buffer) with contract tests.
   - [x] Extend PII scrub hooks prior to storage and document toggles per tenant.
-  - [ ] Deliver TypeScript SDK transport/offline buffer.
+  - [x] Deliver TypeScript SDK transport/offline buffer.
   - [ ] Define collector idempotency helpers + default headers across SDKs.
 
 Checklist
