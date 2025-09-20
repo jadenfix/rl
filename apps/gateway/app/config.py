@@ -12,6 +12,8 @@ class GatewaySettings:
     postgres_dsn: str
     shadow_sampling_rate: float = 0.1
     default_statuses: tuple[str, ...] = ("active", "shadow")
+    collector_url: str = "http://localhost:8100"
+    collector_api_key: str = ""
 
     @classmethod
     def from_env(cls) -> "GatewaySettings":
@@ -41,7 +43,16 @@ class GatewaySettings:
             if status.strip()
         ) or ("active", "shadow")
 
-        return cls(postgres_dsn=dsn, shadow_sampling_rate=shadow_rate, default_statuses=statuses)
+        collector_url = os.environ.get("COLLECTOR_URL", "http://localhost:8100")
+        collector_key = os.environ.get("COLLECTOR_API_KEY", "")
+
+        return cls(
+            postgres_dsn=dsn,
+            shadow_sampling_rate=shadow_rate,
+            default_statuses=statuses,
+            collector_url=collector_url,
+            collector_api_key=collector_key,
+        )
 
 
 settings = GatewaySettings.from_env()

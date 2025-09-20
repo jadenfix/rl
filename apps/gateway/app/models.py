@@ -14,6 +14,7 @@ class InferenceRequest(BaseModel):
     context: Optional[Dict[str, Any]] = None
     version: Optional[Dict[str, Any]] = None
     metadata: Optional[Dict[str, Any]] = None
+    interaction_id: Optional[str] = None
 
 
 class Policy(BaseModel):

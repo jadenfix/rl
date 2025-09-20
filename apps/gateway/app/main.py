@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from typing import Any, Dict, List, Tuple
+from uuid import uuid4
 
 import uvicorn
 from fastapi import Depends, FastAPI, HTTPException
@@ -12,25 +14,32 @@ from fastapi.responses import PlainTextResponse
 from prometheus_client import Counter, Gauge, Histogram, generate_latest
 
 from .backends import BackendClient, BackendResult, StubBackend
-from .logging import build_shadow_log, log_shadow_results
 from .config import GatewaySettings, settings
-from .models import HealthResponse, InferenceRequest, InferenceResponse, PolicyDecision, PolicyListResponse
+from .logging import build_shadow_log, log_shadow_results
+from .models import (
+    HealthResponse,
+    InferenceRequest,
+    InferenceResponse,
+    PolicyDecision,
+    PolicyListResponse,
+)
 from .policy import PolicyStore
 from .router import PolicyRouter
+from .telemetry import CollectorClient
 
 logger = logging.getLogger("gateway")
 logging.basicConfig(level=logging.INFO)
 
-app = FastAPI(title="RLaaS Inference Gateway", version="0.2.0")
+app = FastAPI(title="RLaaS Inference Gateway", version="0.3.0")
 
 REQUEST_COUNTER = Counter("gateway_inference_requests_total", "Total inference requests", ["tenant", "skill"])
 SHADOW_GAUGE = Gauge("gateway_shadow_candidates", "Number of shadow policies sampled")
 REQUEST_LATENCY = Histogram("gateway_inference_latency_seconds", "Gateway inference latency", ["policy_id"])
 
-
 _store = PolicyStore(settings=settings)
 _router = PolicyRouter(settings=settings)
 _backend = StubBackend()
+_telemetry = CollectorClient(settings=settings)
 
 
 def get_store() -> PolicyStore:
@@ -43,6 +52,10 @@ def get_router() -> PolicyRouter:
 
 def get_backend() -> BackendClient:
     return _backend
+
+
+def get_telemetry() -> CollectorClient:
+    return _telemetry
 
 
 @app.get("/healthz", response_model=HealthResponse)
@@ -68,6 +81,7 @@ async def infer(
     store: PolicyStore = Depends(get_store),
     router: PolicyRouter = Depends(get_router),
     backend: BackendClient = Depends(get_backend),
+    telemetry: CollectorClient = Depends(get_telemetry),
 ) -> InferenceResponse:
     policies = store.list_policies(request.tenant_id, request.skill)
     if not policies:
@@ -84,11 +98,27 @@ async def infer(
         "context": request.context,
     }
 
-    main_result, shadow_results = await _execute_policies(backend, decision, payload)
+    interaction_id = (
+        request.interaction_id
+        or (request.metadata or {}).get("interaction_id")
+        or uuid4().hex
+    )
 
-    if shadow_results:
-        shadow_payload = build_shadow_log(request, decision, shadow_results)
+    main_result, main_latency, shadow_pairs = await _execute_policies(backend, decision, payload)
+
+    if shadow_pairs:
+        shadow_payload = build_shadow_log(request, decision, [result for _, result, _ in shadow_pairs])
         log_shadow_results(shadow_payload)
+
+    await _log_outputs(
+        telemetry=telemetry,
+        request=request,
+        decision=decision,
+        interaction_id=interaction_id,
+        main_result=main_result,
+        main_latency=main_latency,
+        shadow_pairs=shadow_pairs,
+    )
 
     response = InferenceResponse(
         decision=decision,
@@ -114,30 +144,122 @@ async def _execute_policies(
     backend: BackendClient,
     decision: PolicyDecision,
     payload: Dict[str, Any],
-) -> Tuple[BackendResult, List[BackendResult]]:
-    shadow_tasks = []
-    for policy in decision.shadow_candidates:
-        shadow_tasks.append(backend.call(policy.policy_id, payload))
+) -> Tuple[BackendResult, float, List[Tuple[str, BackendResult, float]]]:
+    async def call_policy(policy_id: str) -> Tuple[BackendResult, float]:
+        start = time.perf_counter()
+        result = await backend.call(policy_id, payload)
+        elapsed = time.perf_counter() - start
+        return result, elapsed
+
+    shadow_tasks = [call_policy(policy.policy_id) for policy in decision.shadow_candidates]
 
     with REQUEST_LATENCY.labels(policy_id=decision.selected.policy_id).time():
-        main_result = await backend.call(decision.selected.policy_id, payload)
+        main_result, main_latency = await call_policy(decision.selected.policy_id)
 
-    shadow_results = []
+    shadow_pairs: List[Tuple[str, BackendResult, float]] = []
     if shadow_tasks:
         shadow_results = await asyncio.gather(*shadow_tasks, return_exceptions=False)
-    return main_result, shadow_results
+        for policy, (result, latency) in zip(decision.shadow_candidates, shadow_results):
+            shadow_pairs.append((policy.policy_id, result, latency))
+
+    return main_result, main_latency, shadow_pairs
+
+
+async def _log_outputs(
+    *,
+    telemetry: CollectorClient,
+    request: InferenceRequest,
+    decision: PolicyDecision,
+    interaction_id: str,
+    main_result: BackendResult,
+    main_latency: float,
+    shadow_pairs: List[Tuple[str, BackendResult, float]],
+) -> None:
+    main_event = _build_output_event(
+        tenant_id=request.tenant_id,
+        interaction_id=interaction_id,
+        result=main_result,
+        policy_id=decision.selected.policy_id,
+        base_model=decision.selected.base_model,
+        status=decision.reason,
+        latency=main_latency,
+        metadata=request.metadata,
+    )
+    await telemetry.log_output(main_event)
+
+    if not shadow_pairs:
+        return
+
+    await asyncio.gather(
+        *[
+            telemetry.log_output(
+                _build_output_event(
+                    tenant_id=request.tenant_id,
+                    interaction_id=interaction_id,
+                    result=result,
+                    policy_id=policy_id,
+                    base_model=decision.selected.base_model,
+                    status="shadow",
+                    latency=latency,
+                    metadata=request.metadata,
+                    shadow_of=decision.selected.policy_id,
+                )
+            )
+            for policy_id, result, latency in shadow_pairs
+        ],
+        return_exceptions=False,
+    )
+
+
+def _build_output_event(
+    *,
+    tenant_id: str,
+    interaction_id: str,
+    result: BackendResult,
+    policy_id: str,
+    base_model: str,
+    status: str,
+    latency: float,
+    metadata: Dict[str, Any] | None,
+    shadow_of: str | None = None,
+) -> Dict[str, Any]:
+    costs = result.metadata.get("costs") if isinstance(result.metadata, dict) else None
+    if not isinstance(costs, dict):
+        costs = {"tokens_in": 0, "tokens_out": 0}
+    event: Dict[str, Any] = {
+        "tenant_id": tenant_id,
+        "interaction_id": interaction_id,
+        "output": {"text": result.text, "metadata": result.metadata},
+        "timings": {"ms_total": max(int(latency * 1000), 1)},
+        "costs": costs,
+        "version": {
+            "policy_id": policy_id,
+            "base_model": base_model,
+            "status": status,
+        },
+        "idempotency_key": f"{interaction_id}:{policy_id}:{status}",
+    }
+    if metadata:
+        event["metadata"] = metadata
+    if shadow_of:
+        event["version"]["shadow_of"] = shadow_of
+    return event
 
 
 @app.on_event("startup")
 def on_startup() -> None:
-    # Warm the store connection pool.
     _store.open()
-    logger.info("Gateway startup complete (shadow rate=%.2f)", settings.shadow_sampling_rate)
+    logger.info(
+        "Gateway startup complete (shadow rate=%.2f, collector=%s)",
+        settings.shadow_sampling_rate,
+        settings.collector_url,
+    )
 
 
 @app.on_event("shutdown")
-def on_shutdown() -> None:
+async def on_shutdown() -> None:
     _store.close()
+    await _telemetry.close()
 
 
 if __name__ == "__main__":
