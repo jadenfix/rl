@@ -10,3 +10,4 @@ Short-term deliverables:
 - SDK workplan (`docs/SDK_TASKS.md`)
 - Support draft integration example (`docs/examples/support_draft.md`)
 - Zendesk support draft playbook (`docs/examples/zendesk_support_draft.md`)
+- Gmail support draft playbook (`docs/examples/gmail_support_draft.md`)
