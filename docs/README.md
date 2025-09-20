@@ -9,3 +9,4 @@ Short-term deliverables:
 - Phase 2 deployment and routing decision diagrams
 - SDK workplan (`docs/SDK_TASKS.md`)
 - Support draft integration example (`docs/examples/support_draft.md`)
+- Zendesk support draft playbook (`docs/examples/zendesk_support_draft.md`)
