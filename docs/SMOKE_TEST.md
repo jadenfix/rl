@@ -80,8 +80,22 @@ psql "$DATABASE_URL" -c "SELECT event_type, occurred_at FROM events ORDER BY occ
 1. **PII scrubbing sanity check** — Send an event with synthetic PII (`user@example.com`, `+1-555-000-1111`) and confirm the persisted JSON (`events.payload`) stores `[REDACTED]` instead.
 2. **MinIO staging** — With the stack running, configure the MinIO client (`mc alias set local http://localhost:${MINIO_PORT} $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD`) and run `mc ls local/rlaas-events/events/staging` to confirm JSONL drops into `events/staging/<event_type>/dt=<date>/`.
 3. **Daily compaction dry run** — Trigger `make compact` locally. The command uploads a parquet batch to `events/parquet/dt=<date>/events-<time>.parquet` in MinIO. Inspect the file via `mc cat local/rlaas-events/<path>` or download through the console.
-4. **Idempotency dedupe** — Send the same payload twice with the header `Idempotency-Key: test-key-123`. The second call should return `202` and no duplicate row should appear in `events` (check via `SELECT COUNT(*) FROM events WHERE payload->>'idempotency_key' = 'test-key-123';`).
-5. **OpenAPI export** — Run `make openapi` to regenerate `docs/openapi/collector.json`. Share this artifact with SDK consumers to ensure consistent typing.
+4. **Gateway smoke** — POST to `http://localhost:8000/v1/infer` with a sample payload. With `GATEWAY_USE_STUB_BACKEND=true` you should see a stubbed response and corresponding `interaction.output` rows in the collector. Example:
+
+```bash
+curl -X POST http://localhost:8000/v1/infer \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "tenant_id": "acme-support",
+    "skill": "support_draft_email",
+    "input": {"text": "Customer is asking about refunds."}
+  }'
+```
+
+5. **Idempotency dedupe** — Send the same payload twice with the header `Idempotency-Key: test-key-123`. The second call should return `202` and no duplicate row should appear in `events` (check via `SELECT COUNT(*) FROM events WHERE payload->>'idempotency_key' = 'test-key-123';`).
+6. **OpenAPI export** — Run `make openapi` to regenerate `docs/openapi/collector.json`. Share this artifact with SDK consumers to ensure consistent typing.
+
+> Switching to a real inference backend? Set `INFERENCE_BASE_URL` and `INFERENCE_API_KEY` in `.env`, and flip `GATEWAY_USE_STUB_BACKEND=false` before running `make up`.
 
 > Upgrading an existing database? Apply the idempotency schema patch manually:
 > ```sql

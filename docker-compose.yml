@@ -39,10 +39,17 @@ services:
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: ${POSTGRES_PORT}
+      DATABASE_URL: ${DATABASE_URL}
+      COLLECTOR_URL: http://collector:8100
+      COLLECTOR_API_KEY: ${COLLECTOR_API_KEY:-}
+      INFERENCE_BASE_URL: ${INFERENCE_BASE_URL:-}
+      INFERENCE_API_KEY: ${INFERENCE_API_KEY:-}
+      GATEWAY_USE_STUB_BACKEND: ${GATEWAY_USE_STUB_BACKEND:-true}
     ports:
       - "8000:8000"
     depends_on:
       - postgres
+      - collector
 
   reward:
     build:

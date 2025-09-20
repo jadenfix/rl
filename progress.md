@@ -48,6 +48,7 @@ Progress log — RLaaS implementation
 - 2025-09-19 15:52 PDT — Wired gateway inference responses into the collector with async telemetry client, shadow event logging, and configurable collector URL/API key (`apps/gateway/app/main.py`, `apps/gateway/app/telemetry.py`, `config/.env.example`).
 - 2025-09-19 15:58 PDT — Added configurable HTTP backend client with API key support and fallback stub selection via env (`apps/gateway/app/backends.py`, `apps/gateway/app/config.py`, `apps/gateway/app/main.py`, `config/.env.example`).
 - 2025-09-19 16:05 PDT — Added pytest coverage for router decisions, shadow logging, and output event formatting (`apps/gateway/tests/test_router.py`, `apps/gateway/tests/test_logging.py`, `apps/gateway/tests/test_output_event.py`).
+- 2025-09-19 16:12 PDT — Updated gateway deployment defaults (collector/inference env vars) and smoke tests to cover `/v1/infer` stub flow (`docker-compose.yml`, `config/.env.example`, `docs/SMOKE_TEST.md`, `README.md`).
 
 Current focus
 - Document integration examples (support draft app) referencing smoke-test checklist.
