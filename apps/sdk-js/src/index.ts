@@ -29,3 +29,10 @@ export {
   type NodeAdapterOptions,
   type NodeClientOptions,
 } from "./node";
+export {
+  MemoryStorageAdapter,
+  LocalStorageAdapter,
+  BrowserStorageAdapter,
+  type StorageAdapter,
+  type QueueItem,
+} from "./storage";
