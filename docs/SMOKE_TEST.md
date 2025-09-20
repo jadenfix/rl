@@ -97,6 +97,7 @@ curl -X POST http://localhost:8000/v1/infer \
 
 > Switching to a real inference backend? Set `INFERENCE_BASE_URL` and `INFERENCE_API_KEY` in `.env`, and flip `GATEWAY_USE_STUB_BACKEND=false` before running `make up`.
 > The gateway will ping `/healthz` on the backend during startup and log the result.
+> The default docker-compose ships a stub inference service at `http://localhost:9001` (see `apps/inference`).
 
 > Upgrading an existing database? Apply the idempotency schema patch manually:
 > ```sql

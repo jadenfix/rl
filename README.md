@@ -4,6 +4,7 @@ This repository hosts the services, SDKs, and infrastructure needed to operate t
 
 ## Structure
 - `apps/gateway` — FastAPI inference gateway with policy routing and telemetry hooks.
+- `apps/inference` — Stub inference runner used for local end-to-end testing.
 - `apps/collector` — FastAPI telemetry ingestion service for interactions, feedback, and task results.
 - `apps/reward` — Reward calculation workers and APIs for preference generation.
 - `apps/trainer` — Offline training pipelines for LoRA adapters and reward models.
@@ -22,8 +23,8 @@ This repository hosts the services, SDKs, and infrastructure needed to operate t
 5. Hit each service `http://localhost:{8000,8080,8090,8100}/healthz` to confirm the stack is healthy, then verify seed data in Postgres.
 6. Run `make openapi` to regenerate the collector OpenAPI schema (`docs/openapi/collector.json`) and share it with SDK consumers.
 7. (Optional) Ensure MinIO staging works by sending a sample event and running `make compact` to roll JSONL blobs into a Parquet artifact under `events/parquet/dt=<date>/`.
-8. Configure the inference gateway: set `COLLECTOR_URL`, `COLLECTOR_API_KEY` (if needed), and either `INFERENCE_BASE_URL`/`INFERENCE_API_KEY` for a real backend or `GATEWAY_USE_STUB_BACKEND=true` to exercise the stub (see `config/.env.example`).
-9. If pointing at a real backend, hit `/v1/infer` or `/healthz` on your service first; the gateway now performs a startup health check when `GATEWAY_USE_STUB_BACKEND=false`.
+8. Configure the inference gateway: set `COLLECTOR_URL`, `COLLECTOR_API_KEY` (if needed), and either use the bundled stub (`INFERENCE_BASE_URL=http://inference:9001`, `GATEWAY_USE_STUB_BACKEND=false`) or point to your real backend (`INFERENCE_BASE_URL=https://runner.example.com`, optionally set `INFERENCE_API_KEY`).
+9. If pointing at a real backend, hit `/v1/infer` or `/healthz` on your service first; the gateway performs a startup health check when `GATEWAY_USE_STUB_BACKEND=false`.
 
 Refer to `progress.md` for the latest implementation status and upcoming checkpoints.
 

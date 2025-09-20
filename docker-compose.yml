@@ -30,6 +30,17 @@ services:
     depends_on:
       - postgres
 
+  inference:
+    build:
+      context: ./apps/inference
+      dockerfile: Dockerfile
+    container_name: rlaas-inference
+    restart: unless-stopped
+    environment:
+      UVICORN_WORKERS: 1
+    ports:
+      - "9001:9001"
+
   gateway:
     build:
       context: ./apps/gateway
@@ -42,7 +53,7 @@ services:
       DATABASE_URL: ${DATABASE_URL}
       COLLECTOR_URL: http://collector:8100
       COLLECTOR_API_KEY: ${COLLECTOR_API_KEY:-}
-      INFERENCE_BASE_URL: ${INFERENCE_BASE_URL:-}
+      INFERENCE_BASE_URL: ${INFERENCE_BASE_URL:-http://inference:9001}
       INFERENCE_API_KEY: ${INFERENCE_API_KEY:-}
       GATEWAY_USE_STUB_BACKEND: ${GATEWAY_USE_STUB_BACKEND:-true}
     ports:
@@ -50,6 +61,7 @@ services:
     depends_on:
       - postgres
       - collector
+      - inference
 
   reward:
     build:
