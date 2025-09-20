@@ -13,6 +13,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from prometheus_client import Counter, Gauge, Histogram, generate_latest
 
+from .archive import ShadowLogWriter
 from .backends import BackendClient, BackendResult, HttpBackend, StubBackend
 from .config import GatewaySettings, settings
 from .logging import build_shadow_log, log_shadow_results
@@ -40,6 +41,7 @@ _store = PolicyStore(settings=settings)
 _router = PolicyRouter(settings=settings)
 _backend: BackendClient = StubBackend() if settings.use_stub_backend else HttpBackend(settings=settings)
 _telemetry = CollectorClient(settings=settings)
+_shadow_writer = ShadowLogWriter.from_path(settings.shadow_log_path)
 
 
 def get_store() -> PolicyStore:
@@ -67,6 +69,15 @@ def health() -> HealthResponse:
 def metrics() -> PlainTextResponse:
     data = generate_latest()
     return PlainTextResponse(data, media_type="text/plain; version=0.0.4")
+
+
+@app.get("/debug/shadow-log")
+def shadow_log(limit: int = 50) -> Dict[str, Any]:
+    if _shadow_writer is None:
+        raise HTTPException(status_code=404, detail="Shadow log disabled")
+    safe_limit = max(1, min(limit, 200))
+    entries = _shadow_writer.tail(safe_limit)
+    return {"entries": entries, "limit": safe_limit}
 
 
 @app.get("/v1/policies/{tenant_id}", response_model=PolicyListResponse)
@@ -209,6 +220,23 @@ async def _log_outputs(
         ],
         return_exceptions=False,
     )
+
+    if _shadow_writer is not None:
+        entries = []
+        for policy_id, result, latency in shadow_pairs:
+            entries.append(
+                {
+                    "tenant_id": request.tenant_id,
+                    "interaction_id": interaction_id,
+                    "skill": request.skill,
+                    "selected_policy": decision.selected.policy_id,
+                    "shadow_policy": policy_id,
+                    "latency_ms": int(latency * 1000),
+                    "output": result.text,
+                    "metadata": result.metadata,
+                }
+            )
+        await _shadow_writer.append(entries)
 
 
 def _build_output_event(

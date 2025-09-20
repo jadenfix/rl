@@ -17,6 +17,7 @@ class GatewaySettings:
     inference_base_url: str = ""
     inference_api_key: str = ""
     use_stub_backend: bool = False
+    shadow_log_path: str | None = None
 
     @classmethod
     def from_env(cls) -> "GatewaySettings":
@@ -51,6 +52,7 @@ class GatewaySettings:
         inference_base_url = os.environ.get("INFERENCE_BASE_URL", "")
         inference_api_key = os.environ.get("INFERENCE_API_KEY", "")
         use_stub_backend = os.environ.get("GATEWAY_USE_STUB_BACKEND", "false").lower() == "true"
+        shadow_log_path = os.environ.get("GATEWAY_SHADOW_LOG_PATH")
 
         return cls(
             postgres_dsn=dsn,
@@ -61,6 +63,7 @@ class GatewaySettings:
             inference_base_url=inference_base_url,
             inference_api_key=inference_api_key,
             use_stub_backend=use_stub_backend,
+            shadow_log_path=shadow_log_path,
         )
 
 
