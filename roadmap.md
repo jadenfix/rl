@@ -77,6 +77,7 @@ Latest:
 - Inference endpoint returns structured decisions, logs dual-run shadow outputs, ships telemetry to the collector, and can call real backends via configurable HTTP client (`apps/gateway/app/main.py`, `apps/gateway/app/telemetry.py`, `apps/gateway/app/backends.py`).
 - Added pytest coverage for router decisions, shadow logging, and output event metadata (`apps/gateway/tests`).
 - Shadow comparisons now produce Prometheus counters and per-event metadata (match/length delta) plus optional NDJSON archives for debugging, and the HTTP backend includes a startup health check (`apps/gateway/app/main.py`, `apps/gateway/app/archive.py`, `apps/gateway/app/backends.py`).
+- Documented vLLM integration path for swapping the stub backend with a self-hosted runner (`docs/inference/vllm.md`).
 
 Checklist
 	•	Inference API (/v1/infer) with request tracing (OpenTelemetry)

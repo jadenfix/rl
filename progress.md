@@ -54,6 +54,7 @@ Progress log — RLaaS implementation
 - 2025-09-19 16:32 PDT — Added integration test covering `/v1/infer` dual-run flow with mocked backend/collector, ensuring comparison metadata is emitted (`apps/gateway/tests/test_infer.py`).
 - 2025-09-19 16:38 PDT — Added backend health check on gateway startup when using the HTTP backend and documented configuration updates (`apps/gateway/app/backends.py`, `apps/gateway/app/main.py`, `README.md`, `docs/SMOKE_TEST.md`).
 - 2025-09-19 16:45 PDT — Added stub inference runner service to docker-compose and default envs so the gateway can run end-to-end locally (`apps/inference`, `docker-compose.yml`, `config/.env.example`, `README.md`, `docs/SMOKE_TEST.md`).
+- 2025-09-19 16:52 PDT — Authored vLLM deployment guide and referenced it from plan/roadmap for swapping the stub backend (`docs/inference/vllm.md`, `plan.md`, `roadmap.md`).
 
 Current focus
 - Document integration examples (support draft app) referencing smoke-test checklist.
