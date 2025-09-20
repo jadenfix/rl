@@ -316,12 +316,16 @@ def _compare_outputs(
 
 
 @app.on_event("startup")
-def on_startup() -> None:
+async def on_startup() -> None:
     _store.open()
+    backend_status = True
+    if not settings.use_stub_backend:
+        backend_status = await _backend.health_check()
     logger.info(
-        "Gateway startup complete (shadow rate=%.2f, collector=%s)",
+        "Gateway startup complete (shadow rate=%.2f, collector=%s, backend_ok=%s)",
         settings.shadow_sampling_rate,
         settings.collector_url,
+        backend_status,
     )
 
 

@@ -96,6 +96,7 @@ curl -X POST http://localhost:8000/v1/infer \
 6. **OpenAPI export** — Run `make openapi` to regenerate `docs/openapi/collector.json`. Share this artifact with SDK consumers to ensure consistent typing.
 
 > Switching to a real inference backend? Set `INFERENCE_BASE_URL` and `INFERENCE_API_KEY` in `.env`, and flip `GATEWAY_USE_STUB_BACKEND=false` before running `make up`.
+> The gateway will ping `/healthz` on the backend during startup and log the result.
 
 > Upgrading an existing database? Apply the idempotency schema patch manually:
 > ```sql

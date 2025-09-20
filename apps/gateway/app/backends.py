@@ -24,6 +24,9 @@ class BackendClient:
     async def close(self) -> None:  # pragma: no cover - optional override
         return None
 
+    async def health_check(self) -> bool:  # pragma: no cover - optional override
+        return True
+
 
 class StubBackend(BackendClient):
     async def call(self, policy_id: str, payload: Dict[str, Any]) -> BackendResult:
@@ -63,6 +66,15 @@ class HttpBackend(BackendClient):
 
     async def close(self) -> None:
         await self._client.aclose()
+
+    async def health_check(self) -> bool:
+        try:
+            response = await self._client.get("/healthz")
+            if response.status_code == 200:
+                return True
+        except httpx.HTTPError:
+            pass
+        return False
 
 
 __all__ = ["BackendClient", "BackendResult", "StubBackend", "HttpBackend"]

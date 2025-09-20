@@ -52,6 +52,7 @@ Progress log — RLaaS implementation
 - 2025-09-19 16:18 PDT — Added optional shadow log persistence with `/debug/shadow-log` endpoint and file-based writer (`apps/gateway/app/archive.py`, `apps/gateway/app/main.py`).
 - 2025-09-19 16:25 PDT — Instrumented shadow comparisons with Prometheus counters and metadata (text match, length delta) in collector events (`apps/gateway/app/main.py`).
 - 2025-09-19 16:32 PDT — Added integration test covering `/v1/infer` dual-run flow with mocked backend/collector, ensuring comparison metadata is emitted (`apps/gateway/tests/test_infer.py`).
+- 2025-09-19 16:38 PDT — Added backend health check on gateway startup when using the HTTP backend and documented configuration updates (`apps/gateway/app/backends.py`, `apps/gateway/app/main.py`, `README.md`, `docs/SMOKE_TEST.md`).
 
 Current focus
 - Document integration examples (support draft app) referencing smoke-test checklist.

@@ -23,6 +23,7 @@ This repository hosts the services, SDKs, and infrastructure needed to operate t
 6. Run `make openapi` to regenerate the collector OpenAPI schema (`docs/openapi/collector.json`) and share it with SDK consumers.
 7. (Optional) Ensure MinIO staging works by sending a sample event and running `make compact` to roll JSONL blobs into a Parquet artifact under `events/parquet/dt=<date>/`.
 8. Configure the inference gateway: set `COLLECTOR_URL`, `COLLECTOR_API_KEY` (if needed), and either `INFERENCE_BASE_URL`/`INFERENCE_API_KEY` for a real backend or `GATEWAY_USE_STUB_BACKEND=true` to exercise the stub (see `config/.env.example`).
+9. If pointing at a real backend, hit `/v1/infer` or `/healthz` on your service first; the gateway now performs a startup health check when `GATEWAY_USE_STUB_BACKEND=false`.
 
 Refer to `progress.md` for the latest implementation status and upcoming checkpoints.
 
