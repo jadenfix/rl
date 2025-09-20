@@ -15,13 +15,13 @@ Implementation alignment (roadmap crosswalk)
 Status sync (2025-09-19, see `progress.md`):
 - Phase 0 gate closed: docker-compose stack stood up locally, tenant seed verified against Neon Postgres, and `/healthz` checks confirmed.
 - Phase 1 execution live: FastAPI collector persists to Postgres, enforces per-event idempotency, stages MinIO JSONL, and ships OpenAPI artifacts + Python/TypeScript SDKs (with React helpers).
-- Phase 2 staging: inference gateway skeleton exists; router/bandit wiring will follow once telemetry ingestion and SDK transport are stable.
+- Phase 2 staging: FastAPI gateway with policy store and shadow sampling is live; integrate inference backends and dual-run logging next.
 
 Immediate next actions (P0 focus)
 
 1. (DONE) Stand up the monorepo + docker-compose stack (gateway, trainer, reward, dashboard, SDKs) with pre-commit hooks and seeded tenant/policy tables.
 2. (DONE) Telemetry API + SDKs cover MinIO staging, Parquet compaction, OpenAPI export, PII scrubbing, idempotency, Python/TypeScript transports, React/Node/extension adapters, and integration playbooks.
-3. (NEXT) Implement inference gateway + policy router with bandit scaffolding and shadow logging once telemetry ingestion stabilizes under real traffic.
+3. (IN PROGRESS) Extend inference gateway with backend integrations, dual-run logging, and policy metrics.
 
 ⸻
 

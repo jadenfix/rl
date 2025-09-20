@@ -1,38 +1,112 @@
-from http.server import BaseHTTPRequestHandler, HTTPServer
-import json
+"""FastAPI-based inference gateway skeleton."""
+
+from __future__ import annotations
+
+import logging
+import random
+from typing import Dict
+
+import uvicorn
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.responses import PlainTextResponse
+from prometheus_client import Counter, Gauge, generate_latest
+
+from .config import GatewaySettings, settings
+from .models import HealthResponse, InferenceRequest, InferenceResponse, PolicyListResponse
+from .policy import PolicyStore
+from .router import PolicyRouter
+
+logger = logging.getLogger("gateway")
+logging.basicConfig(level=logging.INFO)
+
+app = FastAPI(title="RLaaS Inference Gateway", version="0.2.0")
+
+REQUEST_COUNTER = Counter("gateway_inference_requests_total", "Total inference requests", ["tenant", "skill"])
+SHADOW_GAUGE = Gauge("gateway_shadow_candidates", "Number of shadow policies sampled")
 
 
-class GatewayHandler(BaseHTTPRequestHandler):
-    def do_GET(self) -> None:  # noqa: N802 (http.server interface)
-        if self.path == "/healthz":
-            self._write_json({"status": "ok", "service": "gateway"})
-        elif self.path == "/metrics":
-            body = "placeholder_metric 1\n"
-            self._write_response(body, content_type="text/plain; version=0.0.4")
-        else:
-            self.send_response(404)
-            self.end_headers()
-
-    def log_message(self, format: str, *args) -> None:  # noqa: A003 (shadow built-in)
-        return
-
-    def _write_json(self, payload: dict) -> None:
-        self._write_response(json.dumps(payload), content_type="application/json")
-
-    def _write_response(self, body: str, content_type: str) -> None:
-        encoded = body.encode("utf-8")
-        self.send_response(200)
-        self.send_header("Content-Type", content_type)
-        self.send_header("Content-Length", str(len(encoded)))
-        self.end_headers()
-        self.wfile.write(encoded)
+_store = PolicyStore(settings=settings)
+_router = PolicyRouter(settings=settings)
 
 
-def main() -> None:
-    server = HTTPServer(("0.0.0.0", 8000), GatewayHandler)
-    print("[gateway] Placeholder service running on :8000. Replace with FastAPI implementation in Phase 1/2.")
-    server.serve_forever()
+def get_store() -> PolicyStore:
+    return _store
+
+
+def get_router() -> PolicyRouter:
+    return _router
+
+
+@app.get("/healthz", response_model=HealthResponse)
+def health() -> HealthResponse:
+    return HealthResponse()
+
+
+@app.get("/metrics")
+def metrics() -> PlainTextResponse:
+    data = generate_latest()
+    return PlainTextResponse(data, media_type="text/plain; version=0.0.4")
+
+
+@app.get("/v1/policies/{tenant_id}", response_model=PolicyListResponse)
+def list_policies(tenant_id: str, skill: str | None = None, store: PolicyStore = Depends(get_store)):  # type: ignore[assignment]
+    policies = store.list_policies(tenant_id=tenant_id, skill=skill)
+    return PolicyListResponse(tenant_id=tenant_id, skill=skill, policies=policies)
+
+
+@app.post("/v1/infer", response_model=InferenceResponse)
+def infer(
+    request: InferenceRequest,
+    store: PolicyStore = Depends(get_store),
+    router: PolicyRouter = Depends(get_router),
+) -> InferenceResponse:
+    policies = store.list_policies(request.tenant_id, request.skill)
+    if not policies:
+        raise HTTPException(status_code=404, detail="No policies available for tenant")
+
+    decision = router.choose(policies)
+    REQUEST_COUNTER.labels(tenant=request.tenant_id, skill=request.skill).inc()
+    SHADOW_GAUGE.set(len(decision.shadow_candidates))
+
+    # Placeholder inference call – replace with actual model invocation / streaming.
+    synthetic_text = _stub_generate_text(request)
+
+    response = InferenceResponse(
+        decision=decision,
+        output={"text": synthetic_text, "annotations": {"source": "stub"}},
+        version={
+            "policy_id": decision.selected.policy_id,
+            "base_model": decision.selected.base_model,
+            "router_reason": decision.reason,
+        },
+    )
+    logger.info(
+        "tenant=%s skill=%s selected_policy=%s shadow=%s",
+        request.tenant_id,
+        request.skill,
+        decision.selected.policy_id,
+        [p.policy_id for p in decision.shadow_candidates],
+    )
+    return response
+
+
+def _stub_generate_text(request: InferenceRequest) -> str:
+    prompt = request.input.get("text") if isinstance(request.input, dict) else None
+    suffix = "..." if prompt else ""
+    return f"[stubbed completion for {request.skill}{suffix}]"
+
+
+@app.on_event("startup")
+def on_startup() -> None:
+    # Warm the store connection pool.
+    _store.open()
+    logger.info("Gateway startup complete (shadow rate=%.2f)", settings.shadow_sampling_rate)
+
+
+@app.on_event("shutdown")
+def on_shutdown() -> None:
+    _store.close()
 
 
 if __name__ == "__main__":
-    main()
+    uvicorn.run("app.main:app", host="0.0.0.0", port=8000)

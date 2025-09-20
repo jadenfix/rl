@@ -43,6 +43,7 @@ Progress log — RLaaS implementation
 - 2025-09-19 15:18 PDT — Added schema-driven TypeScript type generation pipeline and generated event typings for SDK consumers (`apps/sdk-js/scripts/generate-types.mjs`, `apps/sdk-js/src/generated/events.ts`, `apps/sdk-js/package.json`).
 - 2025-09-19 15:25 PDT — Authored Gmail chrome extension playbook covering MV3 setup, background telemetry wiring, and offline buffering (`docs/examples/gmail_support_draft.md`, `docs/README.md`).
 - 2025-09-19 15:30 PDT — Marked Phase 1 telemetry work complete in `plan.md`/`roadmap.md` after finishing SDK parity, platform playbooks, and schema-derived typing.
+- 2025-09-19 15:40 PDT — Replaced placeholder gateway with FastAPI router, Postgres-backed policy store, Prometheus metrics, and stubbed /v1/infer decisions (`apps/gateway/app/main.py`, `apps/gateway/app/policy.py`, `apps/gateway/app/router.py`, `apps/gateway/requirements.txt`).
 
 Current focus
 - Document integration examples (support draft app) referencing smoke-test checklist.

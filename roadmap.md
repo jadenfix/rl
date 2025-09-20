@@ -67,13 +67,14 @@ Phase 2 — Serving gateway & policy router
 
 Goal: vendor-agnostic inference with shadow/A-B gates.
 
-Status: Pending — prep work tracking Plan P0 Step 3; blocked on Phase 1 telemetry stability and SDK availability.
+Status: In progress — FastAPI gateway skeleton with policy store/bandit stubs live; inference backends still stubbed.
 
-Progress: Gateway skeleton online with `/healthz` + `/metrics`; policy registry schema outlined alongside collector schemas, ready for integration once event ingestion is stable (`apps/gateway/app/main.py`, `config/db/init.sql`).
+Progress: Gateway now serves FastAPI `/v1/infer`, `/v1/policies`, and Prometheus metrics with policy routing hooked to Postgres; policy store filters active/shadow candidates and samples shadow traffic (`apps/gateway/app/main.py`, `apps/gateway/app/policy.py`, `apps/gateway/app/router.py`).
 
-Latest planning notes:
-- Router/bandit implementation queued immediately after telemetry cold-storage + SDK transport ship (see `plan.md`, Immediate next actions #3).
-- Drafted bandit helper pseudocode in `plan.md` (Section 5) to guide Thompson Sampling implementation.
+Latest:
+- FastAPI/Prometheus gateway replaces placeholder HTTPServer; idempotent request models and counters added (`apps/gateway/app/main.py`).
+- Policy store fetches tenant policies from Postgres with skill-aware fallback and shadow sampling (configurable via env).
+- Inference endpoint returns structured decisions with stubbed text pending backend integrations.
 
 Checklist
 	•	Inference API (/v1/infer) with request tracing (OpenTelemetry)
