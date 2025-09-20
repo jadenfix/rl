@@ -36,6 +36,11 @@ app = FastAPI(title="RLaaS Inference Gateway", version="0.3.0")
 REQUEST_COUNTER = Counter("gateway_inference_requests_total", "Total inference requests", ["tenant", "skill"])
 SHADOW_GAUGE = Gauge("gateway_shadow_candidates", "Number of shadow policies sampled")
 REQUEST_LATENCY = Histogram("gateway_inference_latency_seconds", "Gateway inference latency", ["policy_id"])
+SHADOW_COMPARISON_COUNTER = Counter(
+    "gateway_shadow_comparisons_total",
+    "Shadow comparison outcomes",
+    ["selected_policy", "shadow_policy", "match"],
+)
 
 _store = PolicyStore(settings=settings)
 _router = PolicyRouter(settings=settings)
@@ -214,6 +219,12 @@ async def _log_outputs(
                     latency=latency,
                     metadata=request.metadata,
                     shadow_of=decision.selected.policy_id,
+                    comparison=_compare_outputs(
+                        main_result,
+                        result,
+                        selected_policy=decision.selected.policy_id,
+                        shadow_policy=policy_id,
+                    ),
                 )
             )
             for policy_id, result, latency in shadow_pairs
@@ -224,6 +235,12 @@ async def _log_outputs(
     if _shadow_writer is not None:
         entries = []
         for policy_id, result, latency in shadow_pairs:
+            comparison = _compare_outputs(
+                main_result,
+                result,
+                selected_policy=decision.selected.policy_id,
+                shadow_policy=policy_id,
+            )
             entries.append(
                 {
                     "tenant_id": request.tenant_id,
@@ -234,6 +251,7 @@ async def _log_outputs(
                     "latency_ms": int(latency * 1000),
                     "output": result.text,
                     "metadata": result.metadata,
+                    "comparison": comparison,
                 }
             )
         await _shadow_writer.append(entries)
@@ -250,6 +268,7 @@ def _build_output_event(
     latency: float,
     metadata: Dict[str, Any] | None,
     shadow_of: str | None = None,
+    comparison: Dict[str, Any] | None = None,
 ) -> Dict[str, Any]:
     costs = result.metadata.get("costs") if isinstance(result.metadata, dict) else None
     if not isinstance(costs, dict):
@@ -271,7 +290,29 @@ def _build_output_event(
         event["metadata"] = metadata
     if shadow_of:
         event["version"]["shadow_of"] = shadow_of
+    if comparison:
+        event["version"]["comparison"] = comparison
     return event
+
+
+def _compare_outputs(
+    main: BackendResult,
+    shadow: BackendResult,
+    *,
+    selected_policy: str,
+    shadow_policy: str,
+) -> Dict[str, Any]:
+    match = main.text.strip() == shadow.text.strip()
+    SHADOW_COMPARISON_COUNTER.labels(
+        selected_policy=selected_policy,
+        shadow_policy=shadow_policy,
+        match=str(match).lower(),
+    ).inc()
+    length_delta = len(shadow.text) - len(main.text)
+    return {
+        "match": match,
+        "length_delta": length_delta,
+    }
 
 
 @app.on_event("startup")

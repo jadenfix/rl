@@ -50,6 +50,7 @@ Progress log — RLaaS implementation
 - 2025-09-19 16:05 PDT — Added pytest coverage for router decisions, shadow logging, and output event formatting (`apps/gateway/tests/test_router.py`, `apps/gateway/tests/test_logging.py`, `apps/gateway/tests/test_output_event.py`).
 - 2025-09-19 16:12 PDT — Updated gateway deployment defaults (collector/inference env vars) and smoke tests to cover `/v1/infer` stub flow (`docker-compose.yml`, `config/.env.example`, `docs/SMOKE_TEST.md`, `README.md`).
 - 2025-09-19 16:18 PDT — Added optional shadow log persistence with `/debug/shadow-log` endpoint and file-based writer (`apps/gateway/app/archive.py`, `apps/gateway/app/main.py`).
+- 2025-09-19 16:25 PDT — Instrumented shadow comparisons with Prometheus counters and metadata (text match, length delta) in collector events (`apps/gateway/app/main.py`).
 
 Current focus
 - Document integration examples (support draft app) referencing smoke-test checklist.
