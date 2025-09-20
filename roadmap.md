@@ -75,6 +75,7 @@ Latest:
 - FastAPI/Prometheus gateway replaces placeholder HTTPServer; idempotent request models and counters added (`apps/gateway/app/main.py`).
 - Policy store fetches tenant policies from Postgres with skill-aware fallback and shadow sampling (configurable via env).
 - Inference endpoint returns structured decisions, logs dual-run shadow outputs, ships telemetry to the collector, and can call real backends via configurable HTTP client (`apps/gateway/app/main.py`, `apps/gateway/app/telemetry.py`, `apps/gateway/app/backends.py`).
+- Added pytest coverage for router decisions, shadow logging, and output event metadata (`apps/gateway/tests`).
 
 Checklist
 	•	Inference API (/v1/infer) with request tracing (OpenTelemetry)
