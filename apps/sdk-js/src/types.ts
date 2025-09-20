@@ -7,6 +7,7 @@ export interface InteractionCreateEvent {
   version: Record<string, unknown>;
   timings: Record<string, unknown>;
   costs: Record<string, unknown>;
+  idempotency_key?: string;
   [key: string]: unknown;
 }
 
@@ -17,6 +18,7 @@ export interface InteractionOutputEvent {
   timings: Record<string, unknown>;
   costs: Record<string, unknown>;
   version: Record<string, unknown>;
+  idempotency_key?: string;
   [key: string]: unknown;
 }
 
@@ -26,6 +28,7 @@ export interface FeedbackSubmitEvent {
   explicit?: Record<string, unknown>;
   implicit?: Record<string, unknown>;
   labels?: Record<string, unknown>;
+  idempotency_key?: string;
   [key: string]: unknown;
 }
 
@@ -33,6 +36,7 @@ export interface TaskResultEvent {
   tenant_id: string;
   interaction_id: string;
   label: Record<string, unknown>;
+  idempotency_key?: string;
   [key: string]: unknown;
 }
 

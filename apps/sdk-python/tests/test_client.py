@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from typing import Optional
 
 import httpx
 import pytest
@@ -18,6 +19,8 @@ def client(tmp_path: Path) -> TelemetryClient:
         payload = json.loads(request.content)
         assert "Authorization" in request.headers
         assert request.headers["User-Agent"].startswith("rl-sdk-python")
+        assert "Idempotency-Key" in request.headers
+        assert payload.get("idempotency_key") == request.headers["Idempotency-Key"]
         return httpx.Response(202, json={"status": "accepted", "echo": payload})
 
     transport = httpx.MockTransport(handler)
@@ -40,10 +43,11 @@ def test_log_interaction_success(client: TelemetryClient) -> None:
 
 
 def test_retry_and_buffer(tmp_path: Path) -> None:
-    attempts = {"count": 0}
+    attempts = {"count": 0, "keys": []}
 
     def handler(request: httpx.Request) -> httpx.Response:
         attempts["count"] += 1
+        attempts["keys"].append(request.headers.get("Idempotency-Key"))
         return httpx.Response(503, text="Service Unavailable")
 
     transport = httpx.MockTransport(handler)
@@ -73,6 +77,7 @@ def test_retry_and_buffer(tmp_path: Path) -> None:
     buffered = buffer_path.read_text().strip()
     assert "/v1/interaction.output" in buffered
     assert attempts["count"] == 2
+    assert attempts["keys"][0] == attempts["keys"][1]
 
 
 def test_flush_replays_buffer(tmp_path: Path) -> None:
@@ -103,11 +108,33 @@ def test_flush_replays_buffer(tmp_path: Path) -> None:
         client.log_task_result(payload)
 
     assert buffer_path.exists()
+    buffered = json.loads(buffer_path.read_text().strip().splitlines()[0])
+    assert "idempotency_key" in buffered["payload"]
 
     def success_handler(request: httpx.Request) -> httpx.Response:
+        assert request.headers.get("Idempotency-Key") == json.loads(request.content)["idempotency_key"]
         return httpx.Response(202)
 
-    success_transport = httpx.MockTransport(success_handler)
-    client._client = httpx.Client(base_url=cfg.base_url, timeout=cfg.timeout, transport=success_transport)
-    flushed = client.flush_offline()
-    assert flushed == 1
+	success_transport = httpx.MockTransport(success_handler)
+	client._client = httpx.Client(base_url=cfg.base_url, timeout=cfg.timeout, transport=success_transport)
+	flushed = client.flush_offline()
+	assert flushed == 1
+
+
+def test_disable_auto_idempotency(tmp_path: Path) -> None:
+	headers: list[Optional[str]] = []
+
+	def handler(request: httpx.Request) -> httpx.Response:
+		headers.append(request.headers.get("Idempotency-Key"))
+		return httpx.Response(202)
+
+	transport = httpx.MockTransport(handler)
+	cfg = ClientConfig(
+		base_url="https://api.example.com",
+		api_key="test",
+		max_retries=0,
+		auto_idempotency=False,
+	)
+	client = TelemetryClient(cfg, transport=transport)
+	client.submit_feedback({"tenant_id": "acme", "interaction_id": "1"})
+	assert headers == [None]

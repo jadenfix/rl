@@ -32,10 +32,14 @@ Progress log — RLaaS implementation
 - 2025-09-19 13:58 PDT — Scaffolded TypeScript SDK package with build/test tooling (tsconfig, vitest config, package manifest) and shared storage adapters (`apps/sdk-js/package.json`, `apps/sdk-js/src/storage.ts`).
 - 2025-09-19 14:05 PDT — Implemented fetch-based telemetry client with retries, timeouts, and offline flush plus Vitest coverage for success, retry, buffering, and validate flows (`apps/sdk-js/src/client.ts`, `apps/sdk-js/test/client.test.ts`).
 - 2025-09-19 14:12 PDT — Updated SDK roadmap and README docs to reflect TypeScript parity and remaining front-end tasks (`docs/SDK_TASKS.md`, `apps/sdk-js/README.md`, `README.md`, `plan.md`, `roadmap.md`).
+- 2025-09-19 14:26 PDT — Added event-level idempotency (column, unique index, header plumbing) and updated collector storage to dedupe writes safely (`config/db/init.sql`, `apps/collector/app/main.py`, `apps/collector/app/storage.py`).
+- 2025-09-19 14:31 PDT — Extended Python SDK to auto-generate `Idempotency-Key` headers with opt-out and expanded pytest coverage for retries/buffering under dedupe (`apps/sdk-python/src/rl_sdk/client.py`, `apps/sdk-python/tests/test_client.py`).
+- 2025-09-19 14:36 PDT — Mirrored idempotency support in the TypeScript SDK with auto key generation, storage replay, and Vitest assertions (`apps/sdk-js/src/client.ts`, `apps/sdk-js/test/client.test.ts`).
+- 2025-09-19 14:40 PDT — Regenerated OpenAPI docs to advertise the `Idempotency-Key` header and refreshed smoke tests/README for the schema upgrade path (`scripts/generate_openapi.py`, `docs/openapi/collector.json`, `docs/SMOKE_TEST.md`, `README.md`).
 
 Current focus
-- Define collector idempotency strategy shared across clients.
+- Prototype React/browser helpers for the TypeScript SDK and document integration examples.
 
 Next checkpoints
-- Document idempotency headers + hashing strategy across SDKs and collector.
-- Prototype React/extension helpers once idempotency is settled.
+- Document integration examples (support draft app) referencing smoke-test checklist.
+- Prototype React/extension helpers for telemetry capture.

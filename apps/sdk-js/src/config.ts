@@ -10,6 +10,7 @@ export interface ClientConfig {
   userAgent?: string;
   storage?: StorageAdapter | null;
   fetchFn?: typeof fetch;
+  autoIdempotency?: boolean;
 }
 
 export interface ResolvedConfig {
@@ -22,6 +23,7 @@ export interface ResolvedConfig {
   userAgent: string;
   storage?: StorageAdapter;
   fetchFn: typeof fetch;
+  autoIdempotency: boolean;
 }
 
 export function resolveConfig(config: ClientConfig): ResolvedConfig {
@@ -40,5 +42,6 @@ export function resolveConfig(config: ClientConfig): ResolvedConfig {
     userAgent: config.userAgent ?? "rlaas-sdk-js/0.1.0",
     storage: config.storage ?? undefined,
     fetchFn,
+    autoIdempotency: config.autoIdempotency ?? true,
   };
 }

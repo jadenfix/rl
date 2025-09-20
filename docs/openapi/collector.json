@@ -49,6 +49,17 @@
             "ApiKeyAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Client-provided key that guarantees at-most-once ingestion per tenant/event type.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -88,6 +99,17 @@
         "security": [
           {
             "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Client-provided key that guarantees at-most-once ingestion per tenant/event type.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {
@@ -131,6 +153,17 @@
             "ApiKeyAuth": []
           }
         ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Client-provided key that guarantees at-most-once ingestion per tenant/event type.",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
           "required": true,
           "content": {
@@ -170,6 +203,17 @@
         "security": [
           {
             "ApiKeyAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "Idempotency-Key",
+            "in": "header",
+            "required": false,
+            "description": "Client-provided key that guarantees at-most-once ingestion per tenant/event type.",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "requestBody": {

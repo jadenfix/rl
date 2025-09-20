@@ -3,7 +3,7 @@ from __future__ import annotations
 import logging
 from typing import Any, Dict
 
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, Header, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import ValidationError
 
@@ -33,6 +33,13 @@ app.add_middleware(
 )
 
 
+def _apply_idempotency(payload: Dict[str, Any], header_key: str | None) -> Dict[str, Any]:
+    cleaned = dict(payload)
+    if header_key and not cleaned.get("idempotency_key"):
+        cleaned["idempotency_key"] = header_key
+    return cleaned
+
+
 def _scrub_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
     tenant_id = payload.get("tenant_id") if isinstance(payload, dict) else None
     return scrubber.scrub(payload, tenant_id=tenant_id)
@@ -50,10 +57,14 @@ def metrics() -> Response:
 
 
 @app.post("/v1/interaction.create", status_code=202)
-def interaction_create(event: schemas.InteractionCreate) -> Dict[str, str]:
-    cleaned = _scrub_payload(event.model_dump())
+def interaction_create(
+    event: schemas.InteractionCreate,
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+) -> Dict[str, str]:
+    payload = _apply_idempotency(event.model_dump(), idempotency_key)
+    cleaned = _scrub_payload(payload)
     try:
-        storage.write_event(event_type="interaction.create", payload=cleaned)
+        storage.write_event(event_type="interaction.create", payload=cleaned, idempotency_key=idempotency_key)
     except Exception as exc:  # pragma: no cover - defensive logging
         logger.exception("Failed to persist interaction.create")
         raise HTTPException(status_code=500, detail="Persistence failure") from exc
@@ -62,10 +73,14 @@ def interaction_create(event: schemas.InteractionCreate) -> Dict[str, str]:
 
 
 @app.post("/v1/interaction.output", status_code=202)
-def interaction_output(event: schemas.InteractionOutput) -> Dict[str, str]:
-    cleaned = _scrub_payload(event.model_dump())
+def interaction_output(
+    event: schemas.InteractionOutput,
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+) -> Dict[str, str]:
+    payload = _apply_idempotency(event.model_dump(), idempotency_key)
+    cleaned = _scrub_payload(payload)
     try:
-        storage.write_event(event_type="interaction.output", payload=cleaned)
+        storage.write_event(event_type="interaction.output", payload=cleaned, idempotency_key=idempotency_key)
     except Exception as exc:  # pragma: no cover
         logger.exception("Failed to persist interaction.output")
         raise HTTPException(status_code=500, detail="Persistence failure") from exc
@@ -74,10 +89,14 @@ def interaction_output(event: schemas.InteractionOutput) -> Dict[str, str]:
 
 
 @app.post("/v1/feedback.submit", status_code=202)
-def feedback_submit(event: schemas.FeedbackSubmit) -> Dict[str, str]:
-    cleaned = _scrub_payload(event.model_dump())
+def feedback_submit(
+    event: schemas.FeedbackSubmit,
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+) -> Dict[str, str]:
+    payload = _apply_idempotency(event.model_dump(), idempotency_key)
+    cleaned = _scrub_payload(payload)
     try:
-        storage.write_event(event_type="feedback.submit", payload=cleaned)
+        storage.write_event(event_type="feedback.submit", payload=cleaned, idempotency_key=idempotency_key)
     except Exception as exc:  # pragma: no cover
         logger.exception("Failed to persist feedback.submit")
         raise HTTPException(status_code=500, detail="Persistence failure") from exc
@@ -86,10 +105,14 @@ def feedback_submit(event: schemas.FeedbackSubmit) -> Dict[str, str]:
 
 
 @app.post("/v1/task_result", status_code=202)
-def task_result(event: schemas.TaskResult) -> Dict[str, str]:
-    cleaned = _scrub_payload(event.model_dump())
+def task_result(
+    event: schemas.TaskResult,
+    idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+) -> Dict[str, str]:
+    payload = _apply_idempotency(event.model_dump(), idempotency_key)
+    cleaned = _scrub_payload(payload)
     try:
-        storage.write_event(event_type="task.result", payload=cleaned)
+        storage.write_event(event_type="task.result", payload=cleaned, idempotency_key=idempotency_key)
     except Exception as exc:  # pragma: no cover
         logger.exception("Failed to persist task.result")
         raise HTTPException(status_code=500, detail="Persistence failure") from exc

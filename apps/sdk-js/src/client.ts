@@ -17,6 +17,13 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+function generateIdempotencyKey(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return crypto.randomUUID();
+  }
+  return `${Date.now().toString(16)}-${Math.random().toString(16).slice(2, 10)}`;
+}
+
 export class TelemetryClient {
   private readonly config: ResolvedConfig;
   private readonly storage?: StorageAdapter;
@@ -38,7 +45,17 @@ export class TelemetryClient {
   private async post<T = unknown>(path: string, payload: Record<string, unknown>, options?: PostOptions): Promise<T | undefined> {
     const { bufferOnFailure = true, expectJson = false } = options ?? {};
     const url = `${this.config.baseUrl}${path}`;
-    const body = JSON.stringify(payload);
+    const finalPayload: Record<string, unknown> = { ...payload };
+    let idempotencyKey = typeof finalPayload.idempotency_key === "string" ? (finalPayload.idempotency_key as string) : undefined;
+    if (!idempotencyKey && this.config.autoIdempotency) {
+      idempotencyKey = generateIdempotencyKey();
+      finalPayload.idempotency_key = idempotencyKey;
+    }
+    const headers = {
+      ...this.headers(),
+      ...(idempotencyKey ? { "Idempotency-Key": idempotencyKey } : {}),
+    };
+    const body = JSON.stringify(finalPayload);
 
     let attempt = 0;
     while (attempt <= this.config.maxRetries) {
@@ -47,7 +64,7 @@ export class TelemetryClient {
         const timeout = setTimeout(() => controller.abort(), this.config.timeoutMs);
         const response = await this.config.fetchFn(url, {
           method: "POST",
-          headers: this.headers(),
+          headers,
           body,
           signal: controller.signal,
         });
@@ -62,7 +79,7 @@ export class TelemetryClient {
         attempt += 1;
         if (attempt > this.config.maxRetries) {
           if (bufferOnFailure && this.storage) {
-            await Promise.resolve(this.storage.enqueue({ path, payload } satisfies QueueItem));
+            await Promise.resolve(this.storage.enqueue({ path, payload: finalPayload } satisfies QueueItem));
           }
           throw error;
         }

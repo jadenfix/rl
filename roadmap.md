@@ -47,7 +47,7 @@ Latest:
   - [x] Implement Python SDK core client (httpx transport, retries, offline buffer) with contract tests.
   - [x] Extend PII scrub hooks prior to storage and document toggles per tenant.
   - [x] Deliver TypeScript SDK transport/offline buffer.
-  - [ ] Define collector idempotency helpers + default headers across SDKs.
+  - [x] Define collector idempotency helpers + default headers across SDKs.
 
 Checklist
 	•	Event API (/v1/interaction.create, /v1/interaction.output, /v1/feedback.submit, /v1/task_result)

@@ -18,5 +18,5 @@
 
 ## Shared tasks
 - [x] Establish OpenAPI spec export from collector to distribute typed clients (`scripts/generate_openapi.py`, `docs/openapi/collector.json`).
-- [ ] Define idempotency strategy (header + payload hash) and integrate with SDK defaults.
+- [x] Define idempotency strategy (header + payload hash) and integrate with SDK defaults (`apps/collector/app/main.py`, `apps/sdk-python`, `apps/sdk-js`).
 - [ ] Document integration examples (support draft app) referencing smoke-test checklist.

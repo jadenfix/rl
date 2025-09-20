@@ -80,4 +80,13 @@ psql "$DATABASE_URL" -c "SELECT event_type, occurred_at FROM events ORDER BY occ
 1. **PII scrubbing sanity check** — Send an event with synthetic PII (`user@example.com`, `+1-555-000-1111`) and confirm the persisted JSON (`events.payload`) stores `[REDACTED]` instead.
 2. **MinIO staging** — With the stack running, configure the MinIO client (`mc alias set local http://localhost:${MINIO_PORT} $MINIO_ROOT_USER $MINIO_ROOT_PASSWORD`) and run `mc ls local/rlaas-events/events/staging` to confirm JSONL drops into `events/staging/<event_type>/dt=<date>/`.
 3. **Daily compaction dry run** — Trigger `make compact` locally. The command uploads a parquet batch to `events/parquet/dt=<date>/events-<time>.parquet` in MinIO. Inspect the file via `mc cat local/rlaas-events/<path>` or download through the console.
-4. **OpenAPI export** — Run `make openapi` to regenerate `docs/openapi/collector.json`. Share this artifact with SDK consumers to ensure consistent typing.
+4. **Idempotency dedupe** — Send the same payload twice with the header `Idempotency-Key: test-key-123`. The second call should return `202` and no duplicate row should appear in `events` (check via `SELECT COUNT(*) FROM events WHERE payload->>'idempotency_key' = 'test-key-123';`).
+5. **OpenAPI export** — Run `make openapi` to regenerate `docs/openapi/collector.json`. Share this artifact with SDK consumers to ensure consistent typing.
+
+> Upgrading an existing database? Apply the idempotency schema patch manually:
+> ```sql
+> ALTER TABLE events ADD COLUMN IF NOT EXISTS idempotency_key TEXT;
+> CREATE UNIQUE INDEX IF NOT EXISTS uniq_events_idempotency
+>   ON events (tenant_id, event_type, idempotency_key)
+>   WHERE idempotency_key IS NOT NULL;
+> ```

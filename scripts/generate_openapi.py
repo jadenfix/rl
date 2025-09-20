@@ -28,6 +28,14 @@ def load_schemas() -> dict[str, dict]:
 def build_openapi(schemas: dict[str, dict]) -> dict:
     components = {f"{name}Event": schema for name, schema in schemas.items()}
 
+    idempotency_parameter = {
+        "name": "Idempotency-Key",
+        "in": "header",
+        "required": False,
+        "description": "Client-provided key that guarantees at-most-once ingestion per tenant/event type.",
+        "schema": {"type": "string"},
+    }
+
     def request_body(ref: str) -> dict:
         return {
             "required": True,
@@ -99,6 +107,7 @@ def build_openapi(schemas: dict[str, dict]) -> dict:
             "post": {
                 "summary": "Ingest interaction request event",
                 "security": [{"ApiKeyAuth": []}],
+                "parameters": [idempotency_parameter],
                 "requestBody": request_body("InteractionCreateEvent"),
                 "responses": {"202": accepted_response},
             }
@@ -107,6 +116,7 @@ def build_openapi(schemas: dict[str, dict]) -> dict:
             "post": {
                 "summary": "Ingest model output event",
                 "security": [{"ApiKeyAuth": []}],
+                "parameters": [idempotency_parameter],
                 "requestBody": request_body("InteractionOutputEvent"),
                 "responses": {"202": accepted_response},
             }
@@ -115,6 +125,7 @@ def build_openapi(schemas: dict[str, dict]) -> dict:
             "post": {
                 "summary": "Ingest user feedback",
                 "security": [{"ApiKeyAuth": []}],
+                "parameters": [idempotency_parameter],
                 "requestBody": request_body("FeedbackSubmitEvent"),
                 "responses": {"202": accepted_response},
             }
@@ -123,6 +134,7 @@ def build_openapi(schemas: dict[str, dict]) -> dict:
             "post": {
                 "summary": "Ingest downstream task result",
                 "security": [{"ApiKeyAuth": []}],
+                "parameters": [idempotency_parameter],
                 "requestBody": request_body("TaskResultEvent"),
                 "responses": {"202": accepted_response},
             }

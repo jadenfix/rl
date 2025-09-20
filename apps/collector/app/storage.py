@@ -120,11 +120,15 @@ class PersistenceLayer:
         logger.info("MinIO staging enabled bucket=%s prefix=%s", settings.minio_bucket, settings.minio_prefix)
         return client
 
-    def write_event(self, event_type: str, payload: Dict[str, Any]) -> None:
+    def write_event(self, event_type: str, payload: Dict[str, Any], idempotency_key: Optional[str] = None) -> None:
         tenant_id = payload.get("tenant_id")
         policy_id = payload.get("version", {}).get("policy_id")
         skill = payload.get("skill")
         occurred_at = self._coerce_datetime(payload.get("created_at"))
+
+        key = idempotency_key or payload.get("idempotency_key")
+        if key:
+            payload = {**payload, "idempotency_key": key}
 
         if self._pool.closed:
             self._pool.open()
@@ -133,8 +137,11 @@ class PersistenceLayer:
             with conn.cursor(row_factory=dict_row) as cur:
                 cur.execute(
                     """
-                    INSERT INTO events (tenant_id, event_type, payload, policy_id, skill, occurred_at)
-                    VALUES (%s, %s, %s::jsonb, %s, %s, %s)
+                    INSERT INTO events (tenant_id, event_type, payload, policy_id, skill, occurred_at, idempotency_key)
+                    VALUES (%s, %s, %s::jsonb, %s, %s, %s, %s)
+                    ON CONFLICT ON CONSTRAINT uniq_events_idempotency
+                    DO UPDATE SET payload = events.payload
+                    RETURNING events.id
                     """,
                     (
                         tenant_id,
@@ -143,9 +150,16 @@ class PersistenceLayer:
                         policy_id,
                         skill,
                         occurred_at,
+                        key,
                     ),
                 )
-        logger.info("Persisted event type=%s tenant=%s", event_type, tenant_id)
+                cur.fetchone()
+        logger.info(
+            "Persisted event type=%s tenant=%s (idempotency=%s)",
+            event_type,
+            tenant_id,
+            key,
+        )
 
         if self._settings.minio_enabled and self._minio:
             self._stage_to_minio(event_type=event_type, payload=payload)

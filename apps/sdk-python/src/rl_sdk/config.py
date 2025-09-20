@@ -16,6 +16,7 @@ class ClientConfig:
     user_agent: str = "rl-sdk-python/0.1.0"
     headers: Dict[str, str] = field(default_factory=dict)
     offline_path: Optional[str] = None
+    auto_idempotency: bool = True
 
 
 __all__ = ["ClientConfig"]

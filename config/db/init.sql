@@ -36,7 +36,8 @@ CREATE TABLE IF NOT EXISTS events (
     payload JSONB NOT NULL,
     policy_id TEXT,
     skill TEXT,
-    occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    idempotency_key TEXT
 );
 
 CREATE INDEX IF NOT EXISTS idx_events_tenant_type_time
@@ -44,3 +45,7 @@ CREATE INDEX IF NOT EXISTS idx_events_tenant_type_time
 
 CREATE INDEX IF NOT EXISTS idx_events_policy_time
     ON events (policy_id, occurred_at DESC);
+
+CREATE UNIQUE INDEX IF NOT EXISTS uniq_events_idempotency
+    ON events (tenant_id, event_type, idempotency_key)
+    WHERE idempotency_key IS NOT NULL;

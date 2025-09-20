@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import time
 from typing import Any, Dict, Optional
+from uuid import uuid4
 
 import httpx
 
@@ -33,18 +34,30 @@ class TelemetryClient:
         headers.update(self._config.headers)
         return headers
 
+    def _prepare_payload(self, payload: Dict[str, Any]) -> tuple[Dict[str, Any], Optional[str]]:
+        outgoing = dict(payload)
+        idempotency_key = outgoing.get("idempotency_key")
+        if not idempotency_key and self._config.auto_idempotency:
+            idempotency_key = uuid4().hex
+            outgoing["idempotency_key"] = idempotency_key
+        return outgoing, idempotency_key
+
     def _post(self, path: str, payload: Dict[str, Any]) -> None:
-        body = json.dumps(payload, separators=(",", ":"))
+        outgoing, idempotency_key = self._prepare_payload(payload)
+        headers = self._headers()
+        if idempotency_key:
+            headers["Idempotency-Key"] = idempotency_key
+        body = json.dumps(outgoing, separators=(",", ":"))
         attempt = 0
         while attempt <= self._config.max_retries:
             try:
-                response = self._client.post(path, content=body, headers=self._headers())
+                response = self._client.post(path, content=body, headers=headers)
                 response.raise_for_status()
                 return
             except (httpx.HTTPError, httpx.TimeoutException) as exc:
                 attempt += 1
                 if attempt > self._config.max_retries:
-                    self._buffer.append({"path": path, "payload": payload})
+                    self._buffer.append({"path": path, "payload": outgoing})
                     raise
                 sleep_for = self._config.backoff_seconds * (2 ** (attempt - 1))
                 time.sleep(sleep_for)
