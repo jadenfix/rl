@@ -74,7 +74,7 @@ Progress: Gateway now serves FastAPI `/v1/infer`, `/v1/policies`, and Prometheus
 Latest:
 - FastAPI/Prometheus gateway replaces placeholder HTTPServer; idempotent request models and counters added (`apps/gateway/app/main.py`).
 - Policy store fetches tenant policies from Postgres with skill-aware fallback and shadow sampling (configurable via env).
-- Inference endpoint returns structured decisions with stubbed text pending backend integrations.
+- Inference endpoint returns structured decisions, logs dual-run shadow outputs, and ships telemetry to the collector for persistence (`apps/gateway/app/main.py`, `apps/gateway/app/telemetry.py`).
 
 Checklist
 	•	Inference API (/v1/infer) with request tracing (OpenTelemetry)
