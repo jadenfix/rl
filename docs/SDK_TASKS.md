@@ -13,7 +13,7 @@
 - [x] Implement pluggable storage adapters (in-memory + localStorage) for offline buffering (`apps/sdk-js/src/storage.ts`).
 - [x] Add Vitest coverage for transport retries, buffering, and validation responses (`apps/sdk-js/test/client.test.ts`).
 - [x] Deliver React hooks (`TelemetryProvider`, `useTelemetryClient`, `useTelemetryLogger`) for web integrations (`apps/sdk-js/src/react`).
-- [ ] Include Node.js adapter with keep-alive agent and optional proxy configuration.
+- [x] Include Node.js adapter with keep-alive agent and optional proxy configuration (`apps/sdk-js/src/node.ts`).
 - [ ] Generate TypeScript types from shared JSON Schemas (via `typescript-json-schema`).
 
 ## Shared tasks

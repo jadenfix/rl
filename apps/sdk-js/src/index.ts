@@ -23,3 +23,9 @@ export {
   useTelemetryClient,
   useTelemetryLogger,
 } from "./react";
+export {
+  createNodeFetch,
+  createNodeTelemetryClient,
+  type NodeAdapterOptions,
+  type NodeClientOptions,
+} from "./node";
