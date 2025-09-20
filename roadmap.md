@@ -40,7 +40,7 @@ Latest:
 - Telemetry collector FastAPI service added with validation endpoints and Prometheus scrape target (`apps/collector`, `docker-compose.yml:4`).
 - Collector now persists events to Postgres via connection pooling, stages JSONL payloads in MinIO, and ships a compaction CLI that writes Parquet batches (`apps/collector/app/storage.py`, `apps/collector/app/compaction.py`).
 - OpenAPI artifacts are generated from shared JSON Schemas via `scripts/generate_openapi.py`, producing `docs/openapi/collector.json` for SDK consumers.
-- Python SDK client delivers retries, offline buffering, and pytest coverage; TypeScript SDK remains the next parity milestone (`apps/sdk-python/src/rl_sdk`, `apps/sdk-python/tests`).
+- Python SDK client delivers retries, offline buffering, idempotency headers, and pytest coverage; TypeScript SDK now ships a matching transport plus React helpers (`apps/sdk-python/src/rl_sdk`, `apps/sdk-js/src`).
 - Focus (Sprint 09-19):
   - [x] Enable MinIO staging path + daily compaction (blocks Parquet exports for Roadmap Phase 1 gate).
   - [x] Generate OpenAPI schema + docs bundle for SDK authors.

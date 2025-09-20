@@ -12,7 +12,7 @@
 - [x] Build core client with fetch + AbortController, including retry policies and exponential backoff (`apps/sdk-js/src/client.ts`).
 - [x] Implement pluggable storage adapters (in-memory + localStorage) for offline buffering (`apps/sdk-js/src/storage.ts`).
 - [x] Add Vitest coverage for transport retries, buffering, and validation responses (`apps/sdk-js/test/client.test.ts`).
-- [ ] Deliver React hooks (`useTelemetry`, `useFeedback`) and vanilla helpers for browser extensions.
+- [x] Deliver React hooks (`TelemetryProvider`, `useTelemetryClient`, `useTelemetryLogger`) for web integrations (`apps/sdk-js/src/react`).
 - [ ] Include Node.js adapter with keep-alive agent and optional proxy configuration.
 - [ ] Generate TypeScript types from shared JSON Schemas (via `typescript-json-schema`).
 

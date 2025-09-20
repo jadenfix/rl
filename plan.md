@@ -14,7 +14,7 @@ Implementation alignment (roadmap crosswalk)
 
 Status sync (2025-09-19, see `progress.md`):
 - Phase 0 gate closed: docker-compose stack stood up locally, tenant seed verified against Neon Postgres, and `/healthz` checks confirmed.
-- Phase 1 execution live: FastAPI collector persists to Postgres, enforces per-event idempotency, stages MinIO JSONL, and ships OpenAPI artifacts + Python/TypeScript SDKs.
+- Phase 1 execution live: FastAPI collector persists to Postgres, enforces per-event idempotency, stages MinIO JSONL, and ships OpenAPI artifacts + Python/TypeScript SDKs (with React helpers).
 - Phase 2 staging: inference gateway skeleton exists; router/bandit wiring will follow once telemetry ingestion and SDK transport are stable.
 
 Immediate next actions (P0 focus)

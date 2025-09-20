@@ -17,3 +17,9 @@ export type {
   TelemetryEvent,
   ValidateResponse,
 } from "./types";
+export {
+  TelemetryProvider,
+  type TelemetryProviderProps,
+  useTelemetryClient,
+  useTelemetryLogger,
+} from "./react";

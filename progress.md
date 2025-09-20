@@ -36,10 +36,11 @@ Progress log — RLaaS implementation
 - 2025-09-19 14:31 PDT — Extended Python SDK to auto-generate `Idempotency-Key` headers with opt-out and expanded pytest coverage for retries/buffering under dedupe (`apps/sdk-python/src/rl_sdk/client.py`, `apps/sdk-python/tests/test_client.py`).
 - 2025-09-19 14:36 PDT — Mirrored idempotency support in the TypeScript SDK with auto key generation, storage replay, and Vitest assertions (`apps/sdk-js/src/client.ts`, `apps/sdk-js/test/client.test.ts`).
 - 2025-09-19 14:40 PDT — Regenerated OpenAPI docs to advertise the `Idempotency-Key` header and refreshed smoke tests/README for the schema upgrade path (`scripts/generate_openapi.py`, `docs/openapi/collector.json`, `docs/SMOKE_TEST.md`, `README.md`).
+- 2025-09-19 14:48 PDT — Added React provider/hooks wrapper for the TypeScript SDK to simplify in-app telemetry wiring and covered with Vitest renderHook tests (`apps/sdk-js/src/react`, `apps/sdk-js/test/react.test.tsx`).
 
 Current focus
-- Prototype React/browser helpers for the TypeScript SDK and document integration examples.
+- Document integration examples (support draft app) referencing smoke-test checklist.
 
 Next checkpoints
-- Document integration examples (support draft app) referencing smoke-test checklist.
-- Prototype React/extension helpers for telemetry capture.
+- Ship documentation/examples for support draft integration path.
+- Add Node adapter + extension helpers for telemetry capture.
