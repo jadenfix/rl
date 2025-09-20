@@ -8,3 +8,4 @@ Short-term deliverables:
 - Phase 1 event schema reference with payload examples (`config/schemas/events/*.json`)
 - Phase 2 deployment and routing decision diagrams
 - SDK workplan (`docs/SDK_TASKS.md`)
+- Support draft integration example (`docs/examples/support_draft.md`)
