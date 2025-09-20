@@ -44,6 +44,7 @@ Progress log — RLaaS implementation
 - 2025-09-19 15:25 PDT — Authored Gmail chrome extension playbook covering MV3 setup, background telemetry wiring, and offline buffering (`docs/examples/gmail_support_draft.md`, `docs/README.md`).
 - 2025-09-19 15:30 PDT — Marked Phase 1 telemetry work complete in `plan.md`/`roadmap.md` after finishing SDK parity, platform playbooks, and schema-derived typing.
 - 2025-09-19 15:40 PDT — Replaced placeholder gateway with FastAPI router, Postgres-backed policy store, Prometheus metrics, and stubbed /v1/infer decisions (`apps/gateway/app/main.py`, `apps/gateway/app/policy.py`, `apps/gateway/app/router.py`, `apps/gateway/requirements.txt`).
+- 2025-09-19 15:46 PDT — Added backend client stubs with shadow dual-run logging and Prometheus latency histogram instrumentation (`apps/gateway/app/backends.py`, `apps/gateway/app/logging.py`, `apps/gateway/app/main.py`).
 
 Current focus
 - Document integration examples (support draft app) referencing smoke-test checklist.
