@@ -32,9 +32,9 @@ Phase 1 — Telemetry & Feedback SDK
 
 Goal: capture everything needed to learn from usage.
 
-Status: In progress — ingestion + Python SDK shipped; wrapping TypeScript parity and idempotency helpers.
+Status: Complete — telemetry ingestion, SDK parity (Python/TypeScript/React/Node/extension), and docs are live.
 
-Progress: JSON schemas landed; FastAPI collector writes validated events into Postgres with connection pooling; placeholder gateway/reward/trainer services keep `/healthz` and `/metrics` coverage for end-to-end smoke tests (`config/schemas/events`, `apps/collector`, `apps/gateway/app/main.py`, `apps/reward/app/main.py`, `apps/trainer/app/main.py`).
+Progress: JSON schemas landed; FastAPI collector writes validated events into Postgres with connection pooling; placeholder gateway/reward/trainer services keep `/healthz` and `/metrics` coverage for end-to-end smoke tests (`config/schemas/events`, `apps/collector`, `apps/gateway/app/main.py`, `apps/reward/app/main.py`, `apps/trainer/app/main.py`). SDK suite now includes React hooks, Node keep-alive helpers, browser extension storage, and schema-derived types.
 Latest:
 - Event JSON Schemas committed for interaction, output, feedback, and task result payloads (`config/schemas/events`).
 - Telemetry collector FastAPI service added with validation endpoints and Prometheus scrape target (`apps/collector`, `docker-compose.yml:4`).
@@ -48,6 +48,7 @@ Latest:
   - [x] Extend PII scrub hooks prior to storage and document toggles per tenant.
   - [x] Deliver TypeScript SDK transport/offline buffer.
   - [x] Define collector idempotency helpers + default headers across SDKs.
+  - [x] Ship React/Node/browser extension helpers and schema-derived event typings.
 
 Checklist
 	•	Event API (/v1/interaction.create, /v1/interaction.output, /v1/feedback.submit, /v1/task_result)

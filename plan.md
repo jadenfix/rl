@@ -20,7 +20,7 @@ Status sync (2025-09-19, see `progress.md`):
 Immediate next actions (P0 focus)
 
 1. (DONE) Stand up the monorepo + docker-compose stack (gateway, trainer, reward, dashboard, SDKs) with pre-commit hooks and seeded tenant/policy tables.
-2. (READY FOR DEV QA) Telemetry API + SDKs now include MinIO staging, Parquet compaction tooling, OpenAPI export, PII scrubbing hooks, idempotency enforcement, and Python/TypeScript transports.
+2. (DONE) Telemetry API + SDKs cover MinIO staging, Parquet compaction, OpenAPI export, PII scrubbing, idempotency, Python/TypeScript transports, React/Node/extension adapters, and integration playbooks.
 3. (NEXT) Implement inference gateway + policy router with bandit scaffolding and shadow logging once telemetry ingestion stabilizes under real traffic.
 
 ⸻
