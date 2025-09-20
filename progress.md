@@ -46,6 +46,7 @@ Progress log — RLaaS implementation
 - 2025-09-19 15:40 PDT — Replaced placeholder gateway with FastAPI router, Postgres-backed policy store, Prometheus metrics, and stubbed /v1/infer decisions (`apps/gateway/app/main.py`, `apps/gateway/app/policy.py`, `apps/gateway/app/router.py`, `apps/gateway/requirements.txt`).
 - 2025-09-19 15:46 PDT — Added backend client stubs with shadow dual-run logging and Prometheus latency histogram instrumentation (`apps/gateway/app/backends.py`, `apps/gateway/app/logging.py`, `apps/gateway/app/main.py`).
 - 2025-09-19 15:52 PDT — Wired gateway inference responses into the collector with async telemetry client, shadow event logging, and configurable collector URL/API key (`apps/gateway/app/main.py`, `apps/gateway/app/telemetry.py`, `config/.env.example`).
+- 2025-09-19 15:58 PDT — Added configurable HTTP backend client with API key support and fallback stub selection via env (`apps/gateway/app/backends.py`, `apps/gateway/app/config.py`, `apps/gateway/app/main.py`, `config/.env.example`).
 
 Current focus
 - Document integration examples (support draft app) referencing smoke-test checklist.

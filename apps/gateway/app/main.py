@@ -13,7 +13,7 @@ from fastapi import Depends, FastAPI, HTTPException
 from fastapi.responses import PlainTextResponse
 from prometheus_client import Counter, Gauge, Histogram, generate_latest
 
-from .backends import BackendClient, BackendResult, StubBackend
+from .backends import BackendClient, BackendResult, HttpBackend, StubBackend
 from .config import GatewaySettings, settings
 from .logging import build_shadow_log, log_shadow_results
 from .models import (
@@ -38,7 +38,7 @@ REQUEST_LATENCY = Histogram("gateway_inference_latency_seconds", "Gateway infere
 
 _store = PolicyStore(settings=settings)
 _router = PolicyRouter(settings=settings)
-_backend = StubBackend()
+_backend: BackendClient = StubBackend() if settings.use_stub_backend else HttpBackend(settings=settings)
 _telemetry = CollectorClient(settings=settings)
 
 
@@ -259,6 +259,7 @@ def on_startup() -> None:
 @app.on_event("shutdown")
 async def on_shutdown() -> None:
     _store.close()
+    await _backend.close()
     await _telemetry.close()
 
 

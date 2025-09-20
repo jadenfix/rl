@@ -14,6 +14,9 @@ class GatewaySettings:
     default_statuses: tuple[str, ...] = ("active", "shadow")
     collector_url: str = "http://localhost:8100"
     collector_api_key: str = ""
+    inference_base_url: str = ""
+    inference_api_key: str = ""
+    use_stub_backend: bool = False
 
     @classmethod
     def from_env(cls) -> "GatewaySettings":
@@ -45,6 +48,9 @@ class GatewaySettings:
 
         collector_url = os.environ.get("COLLECTOR_URL", "http://localhost:8100")
         collector_key = os.environ.get("COLLECTOR_API_KEY", "")
+        inference_base_url = os.environ.get("INFERENCE_BASE_URL", "")
+        inference_api_key = os.environ.get("INFERENCE_API_KEY", "")
+        use_stub_backend = os.environ.get("GATEWAY_USE_STUB_BACKEND", "false").lower() == "true"
 
         return cls(
             postgres_dsn=dsn,
@@ -52,6 +58,9 @@ class GatewaySettings:
             default_statuses=statuses,
             collector_url=collector_url,
             collector_api_key=collector_key,
+            inference_base_url=inference_base_url,
+            inference_api_key=inference_api_key,
+            use_stub_backend=use_stub_backend,
         )
 
 
