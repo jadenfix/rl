@@ -14,7 +14,7 @@
 - [x] Add Vitest coverage for transport retries, buffering, and validation responses (`apps/sdk-js/test/client.test.ts`).
 - [x] Deliver React hooks (`TelemetryProvider`, `useTelemetryClient`, `useTelemetryLogger`) for web integrations (`apps/sdk-js/src/react`).
 - [x] Include Node.js adapter with keep-alive agent and optional proxy configuration (`apps/sdk-js/src/node.ts`).
-- [ ] Generate TypeScript types from shared JSON Schemas (via `typescript-json-schema`).
+- [x] Generate TypeScript types from shared JSON Schemas (via `json-schema-to-typescript`; run `npm run generate:types`).
 
 ## Shared tasks
 - [x] Establish OpenAPI spec export from collector to distribute typed clients (`scripts/generate_openapi.py`, `docs/openapi/collector.json`).

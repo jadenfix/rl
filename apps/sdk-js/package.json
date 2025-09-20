@@ -7,7 +7,8 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "test": "vitest"
+    "test": "vitest",
+    "generate:types": "node scripts/generate-types.mjs"
   },
   "peerDependencies": {
     "react": ">=17",
@@ -23,6 +24,7 @@
     "@types/react-dom": "^18.3.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "json-schema-to-typescript": "^13.1.1",
     "typescript": "^5.4.5",
     "vitest": "^1.6.0"
   },

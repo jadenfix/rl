@@ -40,6 +40,7 @@ Progress log — RLaaS implementation
 - 2025-09-19 14:55 PDT — Authored end-to-end support draft integration guide covering Python + React instrumentation, idempotency, and verification steps (`docs/examples/support_draft.md`, `README.md`, `docs/README.md`).
 - 2025-09-19 15:05 PDT — Added Node-focused adapter with keep-alive/ proxy options and tests plus README/SDK task updates (`apps/sdk-js/src/node.ts`, `apps/sdk-js/test/node.test.ts`, `README.md`, `docs/SDK_TASKS.md`).
 - 2025-09-19 15:12 PDT — Delivered browser extension storage adapter with promise/callback bridging and tested adapters coverage (`apps/sdk-js/src/storage.ts`, `apps/sdk-js/test/storage.test.ts`).
+- 2025-09-19 15:18 PDT — Added schema-driven TypeScript type generation pipeline and generated event typings for SDK consumers (`apps/sdk-js/scripts/generate-types.mjs`, `apps/sdk-js/src/generated/events.ts`, `apps/sdk-js/package.json`).
 
 Current focus
 - Document integration examples (support draft app) referencing smoke-test checklist.
