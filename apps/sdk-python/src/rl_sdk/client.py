@@ -42,7 +42,7 @@ class TelemetryClient:
             outgoing["idempotency_key"] = idempotency_key
         return outgoing, idempotency_key
 
-    def _post(self, path: str, payload: Dict[str, Any]) -> None:
+    def _post(self, path: str, payload: Dict[str, Any], *, buffer_on_failure: bool = True) -> None:
         outgoing, idempotency_key = self._prepare_payload(payload)
         headers = self._headers()
         if idempotency_key:
@@ -57,7 +57,8 @@ class TelemetryClient:
             except (httpx.HTTPError, httpx.TimeoutException) as exc:
                 attempt += 1
                 if attempt > self._config.max_retries:
-                    self._buffer.append({"path": path, "payload": outgoing})
+                    if buffer_on_failure:
+                        self._buffer.append({"path": path, "payload": outgoing})
                     raise
                 sleep_for = self._config.backoff_seconds * (2 ** (attempt - 1))
                 time.sleep(sleep_for)
@@ -88,7 +89,7 @@ class TelemetryClient:
             return 0
 
         def sender(item: Dict[str, Any]) -> None:
-            self._post(item["path"], item["payload"])
+            self._post(item["path"], item["payload"], buffer_on_failure=False)
 
         return self._buffer.replay(sender)
 
