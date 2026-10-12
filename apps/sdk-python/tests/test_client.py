@@ -115,26 +115,71 @@ def test_flush_replays_buffer(tmp_path: Path) -> None:
         assert request.headers.get("Idempotency-Key") == json.loads(request.content)["idempotency_key"]
         return httpx.Response(202)
 
-	success_transport = httpx.MockTransport(success_handler)
-	client._client = httpx.Client(base_url=cfg.base_url, timeout=cfg.timeout, transport=success_transport)
-	flushed = client.flush_offline()
-	assert flushed == 1
+    success_transport = httpx.MockTransport(success_handler)
+    client._client = httpx.Client(base_url=cfg.base_url, timeout=cfg.timeout, transport=success_transport)
+    flushed = client.flush_offline()
+    assert flushed == 1
 
 
 def test_disable_auto_idempotency(tmp_path: Path) -> None:
-	headers: list[Optional[str]] = []
+    headers: list[Optional[str]] = []
 
-	def handler(request: httpx.Request) -> httpx.Response:
-		headers.append(request.headers.get("Idempotency-Key"))
-		return httpx.Response(202)
+    def handler(request: httpx.Request) -> httpx.Response:
+        headers.append(request.headers.get("Idempotency-Key"))
+        return httpx.Response(202)
 
-	transport = httpx.MockTransport(handler)
-	cfg = ClientConfig(
-		base_url="https://api.example.com",
-		api_key="test",
-		max_retries=0,
-		auto_idempotency=False,
-	)
-	client = TelemetryClient(cfg, transport=transport)
-	client.submit_feedback({"tenant_id": "acme", "interaction_id": "1"})
-	assert headers == [None]
+    transport = httpx.MockTransport(handler)
+    cfg = ClientConfig(
+        base_url="https://api.example.com",
+        api_key="test",
+        max_retries=0,
+        auto_idempotency=False,
+    )
+    client = TelemetryClient(cfg, transport=transport)
+    client.submit_feedback({"tenant_id": "acme", "interaction_id": "1"})
+    assert headers == [None]
+
+
+def test_failed_flush_retains_unsent_events_without_duplicates(tmp_path: Path) -> None:
+    buffer_path = tmp_path / "buffer.ndjson"
+    cfg = ClientConfig(base_url="https://api.example.com", api_key="test",
+                       offline_path=str(buffer_path), max_retries=0)
+    sent = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        event = json.loads(request.content)
+        sent.append(event["interaction_id"])
+        return httpx.Response(503 if event["interaction_id"] == "2" else 202)
+
+    with TelemetryClient(cfg, transport=httpx.MockTransport(handler)) as client:
+        for event_id in ("1", "2", "3"):
+            client._buffer.append({"path": "/v1/task_result", "payload": {
+                "tenant_id": "acme", "interaction_id": event_id,
+                "idempotency_key": "stable-" + event_id}})
+        with pytest.raises(httpx.HTTPStatusError):
+            client.flush_offline()
+        assert sent == ["1", "2"]
+        remaining = [json.loads(line) for line in buffer_path.read_text().splitlines()]
+        assert [item["payload"]["interaction_id"] for item in remaining] == ["2", "3"]
+        assert [item["payload"]["idempotency_key"] for item in remaining] == ["stable-2", "stable-3"]
+
+    recovered = []
+    def success(request: httpx.Request) -> httpx.Response:
+        recovered.append(json.loads(request.content)["interaction_id"])
+        return httpx.Response(202)
+
+    with TelemetryClient(cfg, transport=httpx.MockTransport(success)) as client:
+        assert client.flush_offline() == 2
+        assert client.flush_offline() == 0
+    assert recovered == ["2", "3"]
+
+
+def test_malformed_buffer_is_preserved(tmp_path: Path) -> None:
+    from rl_sdk.buffer import OfflineBuffer
+    path = tmp_path / "events.ndjson"
+    buffer = OfflineBuffer(str(path))
+    original = '{"path":"/v1/task_result"}\ninvalid json\n'
+    path.write_text(original)
+    with pytest.raises(json.JSONDecodeError):
+        buffer.replay(lambda event: None)
+    assert path.read_text() == original
