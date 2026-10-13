@@ -6,7 +6,7 @@ This repository hosts the services, SDKs, and infrastructure needed to operate t
 - `apps/gateway` — FastAPI inference gateway with policy routing and telemetry hooks.
 - `apps/inference` — Stub inference runner used for local end-to-end testing.
 - `apps/collector` — FastAPI telemetry ingestion service for interactions, feedback, and task results.
-- `apps/reward` — Reward calculation workers and APIs for preference generation.
+- `apps/reward` — Deterministic normalized edit-similarity API (other reward engines remain roadmap work).
 - `apps/trainer` — Offline training pipelines for LoRA adapters and reward models.
 - `apps/dashboard` — Next.js admin console for operators and auditors.
 - `apps/sdk-python` — Python instrumentation SDK for backend workflows.
