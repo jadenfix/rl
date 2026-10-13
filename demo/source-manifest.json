@@ -1,0 +1,13 @@
+{
+  "recorded_source_commit": "e2dcd558a9121a27b9c07ac96dba04ba0025057e",
+  "files": {
+    "apps/reward/Dockerfile": {
+      "git_blob": "ad0dcd10922ff14f8f3e1ca7ef26cecc177c04e4",
+      "sha256": "2841f90d2ebb37f3d942a97d17ebb165ac40c63a08549569404cbde0541a5c15"
+    },
+    "apps/reward/app/main.py": {
+      "git_blob": "3dd09c2af50c73d1cf87b2ab1f880e9e8d8ae7b5",
+      "sha256": "ca9add5d9c0c829a7db25e8692dcf83a4d68fb4a75d4bd28ef42d80ea1276df4"
+    }
+  }
+}

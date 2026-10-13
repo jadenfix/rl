@@ -29,4 +29,7 @@ python -m pytest --rootdir=. apps/reward/tests -q
 
 Future roadmap items such as task-specific rewards, judge models, persisted
 preferences, and evidence of business correlation are not implemented here.
+
+An actual-process GIF/MP4 walkthrough and reproducible capture receipt live in
+[`../../demo`](../../demo/README.md).
 - APIs to expose reward distributions and health metrics

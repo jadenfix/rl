@@ -28,6 +28,15 @@ This repository hosts the services, SDKs, and infrastructure needed to operate t
 
 Refer to `progress.md` for the latest implementation status and upcoming checkpoints.
 
+## Reward API demo
+
+![Actual local edit-similarity reward flow](demo/reward-edit-similarity.gif)
+
+The demo runs the real local HTTP service against deterministic fixture text,
+including unchanged and rewritten drafts plus malformed and oversized requests.
+See [`demo/README.md`](demo/README.md) for exact reproduction and scope. This is
+a text-change signal, not evidence of model quality or business impact.
+
 ## Telemetry instrumentation (Phase 1)
 - Collector persists events to Postgres and stages JSONL copies in MinIO for downstream compaction (`apps/collector/app/storage.py`).
 - Daily compaction to Parquet is handled by `apps/collector/app/compaction.py`; invoke via `make compact` or `python3 -m apps.collector.app.compaction --date YYYY-MM-DD`.
