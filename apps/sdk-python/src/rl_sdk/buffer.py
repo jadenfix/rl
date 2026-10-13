@@ -34,18 +34,23 @@ class OfflineBuffer:
                 return iter(())
             with self._path.open("r", encoding="utf-8") as fh:
                 lines = fh.readlines()
+            events = [json.loads(line) for line in lines if line.strip()]
             self._path.unlink(missing_ok=True)
-        for line in lines:
-            line = line.strip()
-            if not line:
-                continue
-            yield json.loads(line)
+        yield from events
 
     def replay(self, sender: callable) -> int:
         """Send buffered events using the supplied sender callable."""
         count = 0
-        for event in list(self.drain()):
-            sender(event)
+        events = list(self.drain())
+        for index, event in enumerate(events):
+            try:
+                sender(event)
+            except Exception:
+                # Acknowledged events stay drained; retain the failed event and
+                # every event we have not yet attempted for the next flush.
+                for pending in events[index:]:
+                    self.append(pending)
+                raise
             count += 1
         return count
 
