@@ -11,7 +11,9 @@ PHONE_RE = re.compile(r"(?:\+?\d{1,3}[\s-]?)?(?:\(\d{3}\)|\d{3})[\s-]?\d{3}[\s-]
 CREDIT_CARD_RE = re.compile(r"\b(?:\d[ -]*?){13,16}\b")
 SSN_RE = re.compile(r"\b\d{3}-\d{2}-\d{4}\b")
 
-PATTERNS = (EMAIL_RE, PHONE_RE, CREDIT_CARD_RE, SSN_RE)
+# Mask longer numeric identifiers before phone numbers, whose permissive pattern
+# can otherwise consume only part of a card number and leave its suffix intact.
+PATTERNS = (EMAIL_RE, CREDIT_CARD_RE, SSN_RE, PHONE_RE)
 
 
 @dataclass(frozen=True)

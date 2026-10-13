@@ -1,6 +1,5 @@
 from apps.gateway.app.logging import build_shadow_log
 from apps.gateway.app.models import InferenceRequest, Policy, PolicyDecision
-from apps.gateway.app.models import InteractionOutputEvent  # generated types maybe? not needed
 
 def test_build_shadow_log_structure():
     request = InferenceRequest(tenant_id="acme", skill="support", input={"text": "hello"})

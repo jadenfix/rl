@@ -32,3 +32,9 @@ def test_disabled_scrubber_returns_payload() -> None:
     scrubber = build_scrubber(enabled=False, allowlist=(), redaction_token="[x]")
     payload = {"email": "user@example.com"}
     assert scrubber.scrub(payload)["email"] == "user@example.com"
+
+
+def test_card_numbers_are_fully_redacted_before_phone_matching() -> None:
+    scrubber = build_scrubber(enabled=True, allowlist=(), redaction_token="***")
+    for card in ("4242424242424242", "4242 4242 4242 4242", "4242-4242-4242-4242"):
+        assert scrubber.scrub({"note": f"Card: {card}."}) == {"note": "Card: ***."}

@@ -1,9 +1,11 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from typing import Any, Dict
 
 import pytest
+import pytest_asyncio
 from httpx import AsyncClient, MockTransport, Request, Response
 
 from apps.gateway.app.main import app, _backend, _telemetry, _store
@@ -15,7 +17,7 @@ from apps.gateway.app.router import PolicyRouter
 from apps.gateway.app.models import Policy
 
 
-@pytest.fixture(autouse=True)
+@pytest_asyncio.fixture(autouse=True)
 async def setup_policy_store(monkeypatch):
     # Mock store to return deterministic policies
     class DummyStore(PolicyStore):
@@ -29,14 +31,14 @@ async def setup_policy_store(monkeypatch):
             ]
 
     monkeypatch.setattr("apps.gateway.app.main._store", DummyStore())
-    monkeypatch.setattr("apps.gateway.app.main._router", PolicyRouter(settings=_store.settings if hasattr(_store, "settings") else None))
+    monkeypatch.setattr("apps.gateway.app.main._router", PolicyRouter(settings=GatewaySettings(postgres_dsn="postgresql://test", shadow_sampling_rate=1.0)))
     yield
 
 
-@pytest.fixture(autouse=True)
+@pytest_asyncio.fixture(autouse=True)
 async def mock_backend(monkeypatch):
     async def handler(request: Request) -> Response:
-        data = request.json()
+        data = json.loads(request.content)
         text = f"{data['policy_id']}::{data['input']['text']}"
         return Response(200, json={"text": text, "costs": {"tokens_in": 1, "tokens_out": 2}})
 
@@ -55,7 +57,7 @@ async def mock_backend(monkeypatch):
     await backend.close()
 
 
-@pytest.fixture(autouse=True)
+@pytest_asyncio.fixture(autouse=True)
 async def mock_collector(monkeypatch):
     class DummyCollector(CollectorClient):
         def __init__(self):
