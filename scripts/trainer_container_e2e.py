@@ -47,6 +47,8 @@ def main():
         status, before = request(port, 'POST', '/v1/score', payload)
         assert status == 200
         docker('restart', identity)
+        # Docker can reassign an ephemeral published host port on restart.
+        port = int(docker('port', identity, '8090').stdout.strip().rsplit(':',1)[1])
         assert ready()['model_ready'] is True
         assert request(port, 'POST', '/v1/score', payload) == (200, before)
         # The on-disk artifact agrees with the measured train response.
