@@ -7,7 +7,7 @@ This repository hosts the services, SDKs, and infrastructure needed to operate t
 - `apps/inference` — Stub inference runner used for local end-to-end testing.
 - `apps/collector` — FastAPI telemetry ingestion service for interactions, feedback, and task results.
 - `apps/reward` — Deterministic normalized edit-similarity API (other reward engines remain roadmap work).
-- `apps/trainer` — Offline training pipelines for LoRA adapters and reward models.
+- `apps/trainer` — Executable local pairwise preference reward trainer and checkpoint-backed scoring API; LoRA remains roadmap work.
 - `apps/dashboard` — Next.js admin console for operators and auditors.
 - `apps/sdk-python` — Python instrumentation SDK for backend workflows.
 - `apps/sdk-js` — TypeScript instrumentation SDK for web and extension environments.
@@ -53,3 +53,12 @@ a text-change signal, not evidence of model quality or business impact.
 ## Docs & Examples
 - Phase 0 smoke tests (`docs/SMOKE_TEST.md`) walk through stack bring-up and validation.
 - Support draft integration example (`docs/examples/support_draft.md`) shows end-to-end SDK usage for the MVP skill.
+
+## Actual preference training
+
+The [preference trainer](apps/trainer/README.md) performs real CPU gradient updates,
+reports measured logistic loss and serves scores from durable reloadable
+checkpoints. Its bundled data is explicitly synthetic and its transparent linear
+reward baseline does not train a language model. Run
+`python -m apps.trainer.app.main train --dataset apps/trainer/examples/preferences.json`
+and follow the documented CLI/HTTP restart workflow.

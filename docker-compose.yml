@@ -82,10 +82,9 @@ services:
     container_name: rlaas-trainer
     restart: unless-stopped
     ports:
-      - "8090:8090"
-    depends_on:
-      - postgres
-      - minio
+      - "127.0.0.1:8090:8090"
+    volumes:
+      - trainer-data:/data
 
   postgres:
     image: postgres:16-alpine
@@ -154,6 +153,7 @@ services:
       - prometheus
 
 volumes:
+  trainer-data:
   postgres-data:
   minio-data:
   qdrant-data:
