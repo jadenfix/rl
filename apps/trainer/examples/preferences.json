@@ -1,0 +1,42 @@
+[
+  {
+    "prompt": "invoice refund",
+    "chosen": "invoice refund Please review the requested details.",
+    "rejected": "unrelated unrelated unrelated!"
+  },
+  {
+    "prompt": "account login",
+    "chosen": "account login Please review the requested details.",
+    "rejected": "unrelated unrelated unrelated!"
+  },
+  {
+    "prompt": "order tracking",
+    "chosen": "order tracking Please review the requested details.",
+    "rejected": "unrelated unrelated unrelated!"
+  },
+  {
+    "prompt": "billing receipt",
+    "chosen": "billing receipt Please review the requested details.",
+    "rejected": "unrelated unrelated unrelated!"
+  },
+  {
+    "prompt": "password reset",
+    "chosen": "password reset Please review the requested details.",
+    "rejected": "unrelated unrelated unrelated!"
+  },
+  {
+    "prompt": "delivery address",
+    "chosen": "delivery address Please review the requested details.",
+    "rejected": "unrelated unrelated unrelated!"
+  },
+  {
+    "prompt": "payment dispute",
+    "chosen": "payment dispute Please review the requested details.",
+    "rejected": "unrelated unrelated unrelated!"
+  },
+  {
+    "prompt": "subscription cancel",
+    "chosen": "subscription cancel Please review the requested details.",
+    "rejected": "unrelated unrelated unrelated!"
+  }
+]

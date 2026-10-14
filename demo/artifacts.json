@@ -1,0 +1,14 @@
+{
+  "receipt.json": {
+    "bytes": 1981,
+    "sha256": "99da1f16919c6b0d19c48a641205366231476d4bcb065ef477e0bd4b88938e32"
+  },
+  "reward-edit-similarity.gif": {
+    "bytes": 546824,
+    "sha256": "4f8248a2610b44fcb41cfdd89a128f85414befcce5d11ad47a484afcfd44b067"
+  },
+  "reward-edit-similarity.mp4": {
+    "bytes": 211292,
+    "sha256": "688f08aca64889630fcc979dffdb4df21a52b7d9790d6c8e3ca3dead38ee0acd"
+  }
+}

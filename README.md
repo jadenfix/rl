@@ -6,8 +6,8 @@ This repository hosts the services, SDKs, and infrastructure needed to operate t
 - `apps/gateway` — FastAPI inference gateway with policy routing and telemetry hooks.
 - `apps/inference` — Stub inference runner used for local end-to-end testing.
 - `apps/collector` — FastAPI telemetry ingestion service for interactions, feedback, and task results.
-- `apps/reward` — Reward calculation workers and APIs for preference generation.
-- `apps/trainer` — Offline training pipelines for LoRA adapters and reward models.
+- `apps/reward` — Deterministic normalized edit-similarity API (other reward engines remain roadmap work).
+- `apps/trainer` — Executable local pairwise preference reward trainer and checkpoint-backed scoring API; LoRA remains roadmap work.
 - `apps/dashboard` — Next.js admin console for operators and auditors.
 - `apps/sdk-python` — Python instrumentation SDK for backend workflows.
 - `apps/sdk-js` — TypeScript instrumentation SDK for web and extension environments.
@@ -28,6 +28,15 @@ This repository hosts the services, SDKs, and infrastructure needed to operate t
 
 Refer to `progress.md` for the latest implementation status and upcoming checkpoints.
 
+## Reward API demo
+
+![Actual local edit-similarity reward flow](demo/reward-edit-similarity.gif)
+
+The demo runs the real local HTTP service against deterministic fixture text,
+including unchanged and rewritten drafts plus malformed and oversized requests.
+See [`demo/README.md`](demo/README.md) for exact reproduction and scope. This is
+a text-change signal, not evidence of model quality or business impact.
+
 ## Telemetry instrumentation (Phase 1)
 - Collector persists events to Postgres and stages JSONL copies in MinIO for downstream compaction (`apps/collector/app/storage.py`).
 - Daily compaction to Parquet is handled by `apps/collector/app/compaction.py`; invoke via `make compact` or `python3 -m apps.collector.app.compaction --date YYYY-MM-DD`.
@@ -44,3 +53,12 @@ Refer to `progress.md` for the latest implementation status and upcoming checkpo
 ## Docs & Examples
 - Phase 0 smoke tests (`docs/SMOKE_TEST.md`) walk through stack bring-up and validation.
 - Support draft integration example (`docs/examples/support_draft.md`) shows end-to-end SDK usage for the MVP skill.
+
+## Actual preference training
+
+The [preference trainer](apps/trainer/README.md) performs real CPU gradient updates,
+reports measured logistic loss and serves scores from durable reloadable
+checkpoints. Its bundled data is explicitly synthetic and its transparent linear
+reward baseline does not train a language model. Run
+`python -m apps.trainer.app.main train --dataset apps/trainer/examples/preferences.json`
+and follow the documented CLI/HTTP restart workflow.

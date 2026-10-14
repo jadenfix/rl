@@ -1,0 +1,47 @@
+{
+  "recorded_source_commit": "e2dcd558a9121a27b9c07ac96dba04ba0025057e",
+  "requests": {
+    "health": {
+      "body": "{\"service\":\"reward\",\"status\":\"ok\"}",
+      "content_type": "application/json",
+      "status": 200
+    },
+    "malformed": {
+      "body": "{\"error\":\"malformed_json\"}",
+      "content_type": "application/json",
+      "status": 400
+    },
+    "metrics": {
+      "body": "# HELP reward_requests_total Reward HTTP requests by outcome.\n# TYPE reward_requests_total counter\nreward_requests_total{outcome=\"health\"} 1\nreward_requests_total{outcome=\"not_found\"} 0\nreward_requests_total{outcome=\"payload_too_large\"} 1\nreward_requests_total{outcome=\"success\"} 2\nreward_requests_total{outcome=\"validation_error\"} 1\n",
+      "content_type": "text/plain; version=0.0.4",
+      "status": 200
+    },
+    "oversized": {
+      "body": "{\"error\":\"payload_too_large\",\"max_bytes\":65536}",
+      "content_type": "application/json",
+      "status": 413
+    },
+    "rewritten": {
+      "body": "{\"candidate_length\":43,\"distance\":15,\"edited_length\":37,\"metric\":\"normalized_levenshtein_similarity\",\"score\":0.6511627906976745}",
+      "content_type": "application/json",
+      "status": 200
+    },
+    "unchanged": {
+      "body": "{\"candidate_length\":38,\"distance\":0,\"edited_length\":38,\"metric\":\"normalized_levenshtein_similarity\",\"score\":1.0}",
+      "content_type": "application/json",
+      "status": 200
+    }
+  },
+  "scope": "deterministic fixture text; no model-quality or business-correlation claim",
+  "source_files": {
+    "apps/reward/Dockerfile": {
+      "git_blob": "ad0dcd10922ff14f8f3e1ca7ef26cecc177c04e4",
+      "sha256": "2841f90d2ebb37f3d942a97d17ebb165ac40c63a08549569404cbde0541a5c15"
+    },
+    "apps/reward/app/main.py": {
+      "git_blob": "3dd09c2af50c73d1cf87b2ab1f880e9e8d8ae7b5",
+      "sha256": "ca9add5d9c0c829a7db25e8692dcf83a4d68fb4a75d4bd28ef42d80ea1276df4"
+    }
+  },
+  "tests": "10 passed"
+}
